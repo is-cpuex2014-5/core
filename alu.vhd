@@ -29,6 +29,12 @@ begin
       if opc_alu = "0000001" then
         reg_out <= reg_in_a + reg_in_b;
       end if;
+      if opc_alu = "0000010" then
+        reg_out <= reg_in_a - reg_in_b;
+      end if;
+      if opc_alu = "0000011" then
+        reg_out <= reg_in_a - reg_in_b;
+      end if;
     end if;
   end process;
 end alu_main;

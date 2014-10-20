@@ -28,6 +28,14 @@ architecture cocore of core is
     reg_out : out std_logic_vector(31 downto 0)
   );
   end component;
+  component compr Port (
+    clk : in std_logic;
+    opc_compr : in std_logic_vector(6 downto 0);
+    reg_in_a : in std_logic_vector(31 downto 0);
+    reg_in_b : in std_logic_vector(31 downto 0);
+    cond_out : out std_logic
+  );
+  end component;
 -- registers
   signal rgzero : std_logic_vector(31 downto 0) := x"00000000";
   signal rg1 : std_logic_vector(31 downto 0) := x"00000007";
@@ -50,6 +58,7 @@ architecture cocore of core is
   signal phase : std_logic_vector(2 downto 0) := "000";
     --phase: active phase (without pipelines)
   signal pc : std_logic_vector(31 downto 0) := x"00000000";
+  signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
   signal ldsig : std_logic := '1';
   signal inst_from_fetch : std_logic_vector(31 downto 0);
   signal ftdcode : std_logic_vector(31 downto 0);
@@ -57,6 +66,10 @@ architecture cocore of core is
   signal reg_in_a : std_logic_vector(31 downto 0);
   signal reg_in_b : std_logic_vector(31 downto 0);
   signal reg_out : std_logic_vector(31 downto 0);
+  signal opccode_compr : std_logic_vector(6 downto 0);
+  signal reg_in_a_compr : std_logic_vector(31 downto 0);
+  signal reg_in_b_compr : std_logic_vector(31 downto 0);
+  signal cond_out_compr : std_logic;
 begin
   with_fetch: fetch Port map (
       clk => clk,
@@ -71,10 +84,18 @@ begin
       reg_in_b => reg_in_b,
       reg_out => reg_out
     );
+  with_compr: compr Port map (
+      clk => clk,
+      opc_compr => opccode_compr,
+      reg_in_a => reg_in_a_compr,
+      reg_in_b => reg_in_b_compr,
+      cond_out => cond_out_compr
+    );
   core_pro: process(clk)
   begin
     if rising_edge(clk) then
       if state = x"00" then
+        -- initialize groups
         if phase = "000" then
           --Phase Fetch
         end if;
@@ -88,8 +109,8 @@ begin
         if phase = "011" then
           --Phase EXEC
           --ALU
-          opccode_alu <= ftdcode(31 downto 25);
           if ftdcode(31 downto 30) = "00" then
+            opccode_alu <= ftdcode(31 downto 25);
             --set register A
             if ftdcode(20 downto 17) = x"0" then
               reg_in_a <= rgzero;
@@ -103,9 +124,15 @@ begin
             if ftdcode(20 downto 17) = x"3" then
               reg_in_a <= rg3;
             end if;
+            if ftdcode(20 downto 17) = x"4" then
+              reg_in_a <= rg4;
+            end if;
+            if ftdcode(20 downto 17) = x"5" then
+              reg_in_a <= rg5;
+            end if;
             --set register B
-            if ftdcode(31 downto 25) = "0000001" then
-              -- add immediate
+            if (ftdcode(31 downto 25) = "0000001") or (ftdcode(31 downto 25) = "0000011") then
+              -- set immediate
               if ftdcode(16) = '1' then
                 -- high
                 reg_in_b <= ftdcode(15 downto 0)&"0000000000000000";
@@ -126,12 +153,83 @@ begin
               if ftdcode(16 downto 13) = x"3" then
                 reg_in_b <= rg3;
               end if;
+              if ftdcode(16 downto 13) = x"4" then
+                reg_in_b <= rg4;
+              end if;
+              if ftdcode(16 downto 13) = x"5" then
+                reg_in_b <= rg5;
+              end if;
+            end if;
+          end if;
+          --Branch
+          if ftdcode(31 downto 30) = "10" then
+            opccode_compr <= ftdcode(31 downto 25);
+            --set register A
+            if ftdcode(24 downto 21) = x"0" then
+              reg_in_a_compr <= rgzero;
+            end if;
+            if ftdcode(24 downto 21) = x"1" then
+              reg_in_a_compr <= rg1;
+            end if;
+            if ftdcode(24 downto 21) = x"2" then
+              reg_in_a_compr <= rg2;
+            end if;
+            if ftdcode(24 downto 21) = x"3" then
+              reg_in_a_compr <= rg3;
+            end if;
+            if ftdcode(24 downto 21) = x"4" then
+              reg_in_a_compr <= rg4;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              reg_in_a_compr <= rg5;
+            end if;
+            --set register B
+            if ftdcode(20 downto 17) = x"0" then
+              reg_in_b_compr <= rgzero;
+            end if;
+            if ftdcode(20 downto 17) = x"1" then
+              reg_in_b_compr <= rg1;
+            end if;
+            if ftdcode(20 downto 17) = x"2" then
+              reg_in_b_compr <= rg2;
+            end if;
+            if ftdcode(20 downto 17) = x"3" then
+              reg_in_b_compr <= rg3;
+            end if;
+            if ftdcode(20 downto 17) = x"4" then
+              reg_in_b_compr <= rg4;
+            end if;
+            if ftdcode(20 downto 17) = x"5" then
+              reg_in_b_compr <= rg5;
+            end if;
+            --Calculate next PC if branch condition is true
+            opccode_alu <= "0000000";
+            reg_in_a <= pc;
+            if ftdcode(31 downto 25) = "1000000" then
+              if ftdcode(16 downto 13) = x"0" then
+                reg_in_b <= rgzero;
+              end if;
+              if ftdcode(16 downto 13) = x"1" then
+                reg_in_b <= rg1;
+              end if;
+              if ftdcode(16 downto 13) = x"2" then
+                reg_in_b <= rg2;
+              end if;
+              if ftdcode(16 downto 13) = x"3" then
+                reg_in_b <= rg3;
+              end if;
+              if ftdcode(16 downto 13) = x"4" then
+                reg_in_b <= rg4;
+              end if;
+              if ftdcode(16 downto 13) = x"5" then
+                reg_in_b <= rg5;
+              end if;
             end if;
           end if;
         end if;
         if phase = "100" then
           --Phase Store
-          if ftdcode(31 downto 25) = "0000000" then
+          if ftdcode(31 downto 30) = "00" then
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= reg_out;
             end if;
@@ -141,25 +239,39 @@ begin
             if ftdcode(24 downto 21) = x"3" then
               rg3 <= reg_out;
             end if;
-          end if;
-          if ftdcode(31 downto 25) = "0000001" then
-            if ftdcode(24 downto 21) = x"1" then
-              rg1 <= reg_out;
+            if ftdcode(24 downto 21) = x"4" then
+              rg4 <= reg_out;
             end if;
-            if ftdcode(24 downto 21) = x"2" then
-              rg2 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"3" then
-              rg3 <= reg_out;
+            if ftdcode(24 downto 21) = x"5" then
+              rg5 <= reg_out;
             end if;
           end if;
-          --Add PC
-          pc <= pc + 1;
+          --Update PC (Branch case)
+          if ftdcode(31 downto 30) = "10" then
+            pc <= cond_new_pc;
+          else
+            pc <= pc + 1;
+          end if;
         end if;
-        phase <= phase + 1;
+      end if;
+      if state = x"C0" then
+        -- pickup groups
+        -- Update cond_new_pc
+        if phase = "011" then
+          --phase EXEC
+          if cond_out_compr = '1' then
+            cond_new_pc <= reg_out;
+          else
+            cond_new_pc <= pc + 1;
+          end if;
+        end if;
       end if;
       if state = x"BB" then
         debug_otpt <= reg_out;
+      end if;
+      if state = x"FF" then
+        -- move to next phase
+        phase <= phase + 1;
       end if;
       state <= state + 1;
       ostate <= state + 1;
