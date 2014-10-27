@@ -7,7 +7,9 @@ entity core is
   Port (
     clk : in std_logic;
     ostate : out std_logic_vector(7 downto 0);
-    debug_otpt : out std_logic_vector(31 downto 0)
+    debug_otpt : out std_logic_vector(31 downto 0);
+    debug_otpt_code : out std_logic_vector(2 downto 0);
+    debug_otpt_signal : out std_logic := '0'
   );
 end core;
 
@@ -226,6 +228,25 @@ begin
               end if;
             end if;
           end if;
+          if ftdcode(31 downto 25) = "1111111" then
+            -- Debug Output
+            if ftdcode(3 downto 0) = x"1" then
+              debug_otpt <= rg1;
+            end if;
+            if ftdcode(3 downto 0) = x"2" then
+              debug_otpt <= rg2;
+            end if;
+            if ftdcode(3 downto 0) = x"3" then
+              debug_otpt <= rg3;
+            end if;
+            debug_otpt_code <= ftdcode(6 downto 4);
+            debug_otpt_signal <= '1';
+          else
+            debug_otpt_signal <= '0';
+          end if;
+        else
+          -- the case state = 0 ^ phase != 100
+          debug_otpt_signal <= '0';
         end if;
         if phase = "100" then
           --Phase Store
@@ -253,6 +274,9 @@ begin
             pc <= pc + 1;
           end if;
         end if;
+      else
+        -- the case state != 0
+        debug_otpt_signal <= '0';
       end if;
       if state = x"C0" then
         -- pickup groups
@@ -266,9 +290,9 @@ begin
           end if;
         end if;
       end if;
-      if state = x"BB" then
-        debug_otpt <= reg_out;
-      end if;
+      --if state = x"BB" then
+      --  debug_otpt <= reg_out;
+      --end if;
       if state = x"FF" then
         -- move to next phase
         phase <= phase + 1;

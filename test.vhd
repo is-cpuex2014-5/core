@@ -11,17 +11,23 @@ architecture testbench of test is
   component core Port (
     clk: in std_logic;
     ostate: out std_logic_vector(7 downto 0);
-    debug_otpt: out std_logic_vector(31 downto 0)
+    debug_otpt: out std_logic_vector(31 downto 0);
+    debug_otpt_code: out std_logic_vector(2 downto 0);
+    debug_otpt_signal: out std_logic
   );
   end component;
   signal simclk : std_logic := '0';
   signal hogge : std_logic_vector(7 downto 0);
   signal debug_otpt : std_logic_vector(31 downto 0);
+  signal debug_otpt_code : std_logic_vector(2 downto 0);
+  signal debug_otpt_signal : std_logic;
 begin
   core_send: core Port map (
       clk => simclk,
       ostate => hogge,
-      debug_otpt => debug_otpt
+      debug_otpt => debug_otpt,
+      debug_otpt_code => debug_otpt_code,
+      debug_otpt_signal => debug_otpt_signal
     );
   clockgen : process
   begin
