@@ -7,6 +7,11 @@ entity core is
   Port (
     clk : in std_logic;
     ostate : out std_logic_vector(7 downto 0);
+    sram_go : out std_logic := '0';
+    sram_inst_type : out std_logic;
+    sram_addr : out std_logic_vector(19 downto 0);
+    sram_read : in std_logic_vector(31 downto 0);
+    sram_write : out std_logic_vector(31 downto 0);
     debug_otpt : out std_logic_vector(31 downto 0);
     debug_otpt_code : out std_logic_vector(2 downto 0);
     debug_otpt_signal : out std_logic := '0'
@@ -228,7 +233,25 @@ begin
               end if;
             end if;
           end if;
-          if ftdcode(31 downto 25) = "1111111" then
+          --MEMORY
+          if ftdcode(31 downto 25) = "1100000" then
+            --load
+            sram_go <= '1';
+            if ftdcode(24 downto 21) = x"1" then
+              sram_addr <= x"00000";
+              sram_inst_type <= '0';
+            end if;
+          end if;
+          if ftdcode(31 downto 25) = "1100001" then
+            --store
+            sram_go <= '1';
+            if ftdcode(24 downto 21) = x"1" then
+              sram_write <= rg1;
+              sram_addr <= x"00000";
+              sram_inst_type <= '1';
+            end if;
+          end if;
+          if ftdcode(31 downto 20) = x"FFD" then
             -- Debug Output
             if ftdcode(3 downto 0) = x"1" then
               debug_otpt <= rg1;
@@ -244,8 +267,10 @@ begin
           else
             debug_otpt_signal <= '0';
           end if;
+          -- Debug NOP(all FFFFFFF case doesn't update PC)
         else
           -- the case state = 0 ^ phase != 100
+          sram_go <= '0';
           debug_otpt_signal <= '0';
         end if;
         if phase = "100" then
@@ -267,15 +292,26 @@ begin
               rg5 <= reg_out;
             end if;
           end if;
+          if ftdcode(31 downto 25) = "1100000" then
+            --read
+            if ftdcode(24 downto 21) = x"1" then
+              rg1 <= sram_read;
+            end if;
+          end if;
           --Update PC (Branch case)
           if ftdcode(31 downto 30) = "10" then
             pc <= cond_new_pc;
           else
-            pc <= pc + 1;
+            if ftdcode(31 downto 0) = x"FFFFFFFF" then
+              -- added nop
+            else
+              pc <= pc + 1;
+            end if;
           end if;
         end if;
       else
         -- the case state != 0
+        sram_go <= '0';
         debug_otpt_signal <= '0';
       end if;
       if state = x"C0" then

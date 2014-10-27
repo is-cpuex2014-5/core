@@ -31,6 +31,13 @@ begin
           cond_out <= '0';
         end if;
       end if;
+      if (opc_compr = "1000010") or (opc_compr = "1000011") then
+        if reg_in_a < reg_in_b then
+          cond_out <= '1';
+        else
+          cond_out <= '0';
+        end if;
+      end if;
     end if;
   end process;
 end compr_main;
