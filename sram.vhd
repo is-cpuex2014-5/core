@@ -48,7 +48,7 @@ begin
         --waiting
         if sram_go = '1' then
           sram_busy <= '1';
-          waittm <= x"AF";
+          waittm <= x"0F";
           if sram_inst_type = '1' then
             --write set
             SRZA <= sram_addr;

@@ -10,6 +10,7 @@ architecture testbench of test is
   --testbench signal
   component core Port (
     clk: in std_logic;
+    execute_ok: in std_logic;
     ostate: out std_logic_vector(7 downto 0);
     sram_go : out std_logic;
     sram_inst_type : out std_logic;
@@ -22,6 +23,7 @@ architecture testbench of test is
   );
   end component;
   signal simclk : std_logic := '0';
+  signal exok : std_logic := '1';
   signal hogge : std_logic_vector(7 downto 0);
   signal sram_inst_type : std_logic;
   signal sram_go : std_logic;
@@ -34,6 +36,7 @@ architecture testbench of test is
 begin
   core_send: core Port map (
       clk => simclk,
+      execute_ok => exok,
       ostate => hogge,
       sram_inst_type => sram_inst_type,
       sram_go => sram_go,

@@ -27,7 +27,7 @@ entity top is
          XZBE : inout STD_LOGIC_VECTOR (3 downto 0);
          XWA : out STD_LOGIC;
          XRST : in STD_LOGIC;
-         RS_RX : STD_LOGIC
+         RS_RX : in STD_LOGIC
         );
 end top;
 
@@ -36,6 +36,7 @@ architecture cpu_top of top is
   --testbench signal
   component core Port (
     clk: in std_logic;
+    execute_ok: in std_logic;
     ostate: out std_logic_vector(7 downto 0);
     sram_go : out std_logic;
     sram_inst_type : out std_logic;
@@ -85,10 +86,21 @@ architecture cpu_top of top is
       tx : out std_logic
     );
   end component;
+  component inputc
+    Port (
+      clk : in std_logic;
+      execute_ok : out std_logic;
+      debug_read : out std_logic_vector(7 downto 0);
+      rx : in std_logic
+    );
+  end component;
+  signal exok : std_logic := '0';
+  signal exok_from_read : std_logic;
   signal hogge : std_logic_vector(7 downto 0);
   signal debug_otpt : std_logic_vector(31 downto 0);
   signal debug_otpt_code : std_logic_vector(2 downto 0);
   signal debug_otpt_signal : std_logic;
+  signal debug_otpt_inputc : std_logic_vector(7 downto 0);
   signal u232c_data_reg : std_logic_vector(31 downto 0);
   signal u232c_showtype : std_logic_vector(2 downto 0);
   signal u232c_go : std_logic;
@@ -123,8 +135,15 @@ begin
     busy => u232c_busy,
     tx => rs_tx
     );
+  with_inputc : inputc Port map (
+    clk => clk,
+    execute_ok => exok_from_read,
+    debug_read => debug_otpt_inputc,
+    rx => rs_rx
+    );
   core_send: core Port map (
     clk => clk,
+    execute_ok => exok,
     ostate => hogge,
     sram_go => core_sram_go,
     sram_inst_type => core_sram_inst_type,
@@ -191,6 +210,17 @@ begin
         end if;
       else
         sram_go <= '0';
+      end if;
+      -- Core work OK
+      if exok_from_read = '1' then
+        exok <= '1';
+        --if u232c_busy = '0' then
+        --  u232c_data_reg <= x"000000" & debug_otpt_inputc;
+        --  u232c_showtype <= "000";
+        --  u232c_go <= '1';
+        --else
+        --  u232c_go <= '0';
+        --end if;
       end if;
     end if;
   end process;

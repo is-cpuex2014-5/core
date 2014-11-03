@@ -26,19 +26,19 @@ begin
         if waitwrite = 0 then
           -- load from SRAM
           -- send to core
-          if pc > 10 then
+          if pc > 9 then
             --halt (beq s0,s0,s0)
             inst <= x"80000000";
             --inst <= x"FFFFFFFF"; -- nop
           end if;
           if pc = 0 then
-            --addi s1,s0,7
-            inst <= x"02200007";
+            --addi s1,s0,5
+            inst <= x"02200005";
           end if;
           if pc = 1 then
             --debug write 0 s1
             inst <= x"FFDFFF01";
-            waitwrite <= x"20000";
+            --waitwrite <= x"20000";
           end if;
           if pc = 2 then
             --store s1,s0,0
@@ -51,34 +51,29 @@ begin
           if pc = 4 then
             --debug write 0 s1
             inst <= x"FFDFFF01";
-            waitwrite <= x"20000";
+            --waitwrite <= x"20000";
           end if;
           if pc = 5 then
-            --store s1,s0,1
+            --store s1,s0,0
             inst <= x"C2200001";
           end if;
           if pc = 6 then
-            --debug write 0 s1
-            inst <= x"FFDFFF01";
-            waitwrite <= x"20000";
-          end if;
-          if pc = 7 then
             --load s1,s0,0
             inst <= x"C0200000";
           end if;
-          if pc = 8 then
+          if pc = 7 then
             --debug write 0 s1
             inst <= x"FFDFFF01";
-            waitwrite <= x"20000";
+            --waitwrite <= x"20000";
           end if;
-          if pc = 9 then
+          if pc = 8 then
             --load s1,s0,1
             inst <= x"C0200001";
           end if;
-          if pc = 10 then
+          if pc = 9 then
             --debug write 0 s1
             inst <= x"FFDFFF01";
-            waitwrite <= x"20000";
+            --waitwrite <= x"20000";
           end if;
         else
           inst <= x"FFFFFFFF";

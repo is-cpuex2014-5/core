@@ -6,6 +6,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity core is
   Port (
     clk : in std_logic;
+    execute_ok : in std_logic;
     ostate : out std_logic_vector(7 downto 0);
     sram_go : out std_logic := '0';
     sram_inst_type : out std_logic;
@@ -100,7 +101,8 @@ begin
     );
   core_pro: process(clk)
   begin
-    if rising_edge(clk) then
+    if (rising_edge(clk)) and (execute_ok = '1') then
+      -- state action one
       if state = x"00" then
         -- initialize groups
         if phase = "000" then
@@ -236,20 +238,53 @@ begin
           --MEMORY
           if ftdcode(31 downto 25) = "1100000" then
             --load
-            sram_go <= '1';
-            if ftdcode(24 downto 21) = x"1" then
-              sram_addr <= x"00000";
-              sram_inst_type <= '0';
+            --calculate address
+            --register A
+            if ftdcode(20 downto 17) = x"0" then
+              reg_in_a <= rgzero;
             end if;
+            if ftdcode(20 downto 17) = x"1" then
+              reg_in_a <= rg1;
+            end if;
+            if ftdcode(20 downto 17) = x"2" then
+              reg_in_a <= rg2;
+            end if;
+            if ftdcode(20 downto 17) = x"3" then
+              reg_in_a <= rg3;
+            end if;
+            if ftdcode(20 downto 17) = x"4" then
+              reg_in_a <= rg4;
+            end if;
+            if ftdcode(20 downto 17) = x"5" then
+              reg_in_a <= rg5;
+            end if;
+            --register B
+            reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            opccode_alu <= "0000000";
           end if;
           if ftdcode(31 downto 25) = "1100001" then
             --store
-            sram_go <= '1';
-            if ftdcode(24 downto 21) = x"1" then
-              sram_write <= rg1;
-              sram_addr <= x"00000";
-              sram_inst_type <= '1';
+            if ftdcode(20 downto 17) = x"0" then
+              reg_in_a <= rgzero;
             end if;
+            if ftdcode(20 downto 17) = x"1" then
+              reg_in_a <= rg1;
+            end if;
+            if ftdcode(20 downto 17) = x"2" then
+              reg_in_a <= rg2;
+            end if;
+            if ftdcode(20 downto 17) = x"3" then
+              reg_in_a <= rg3;
+            end if;
+            if ftdcode(20 downto 17) = x"4" then
+              reg_in_a <= rg4;
+            end if;
+            if ftdcode(20 downto 17) = x"5" then
+              reg_in_a <= rg5;
+            end if;
+            --register B
+            reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            opccode_alu <= "0000000";
           end if;
           if ftdcode(31 downto 20) = x"FFD" then
             -- Debug Output
@@ -270,10 +305,10 @@ begin
           -- Debug NOP(all FFFFFFF case doesn't update PC)
         else
           -- the case state = 0 ^ phase != 100
-          sram_go <= '0';
           debug_otpt_signal <= '0';
         end if;
         if phase = "100" then
+          --MEMORY
           --Phase Store
           if ftdcode(31 downto 30) = "00" then
             if ftdcode(24 downto 21) = x"1" then
@@ -311,8 +346,41 @@ begin
         end if;
       else
         -- the case state != 0
-        sram_go <= '0';
         debug_otpt_signal <= '0';
+      end if;
+      -- state action two
+      if state = x"80" then
+        if phase = "011" then
+          --Phase EXEC
+          if ftdcode(31 downto 25) = "1100000" then
+            --load
+            sram_go <= '1';
+            sram_addr <= reg_out(19 downto 0);
+            sram_inst_type <= '0';
+          end if;
+          if ftdcode(31 downto 25) = "1100001" then
+            --store
+            sram_go <= '1';
+            sram_inst_type <= '1';
+            sram_addr <= reg_out(19 downto 0);
+            if ftdcode(24 downto 21) = x"0" then
+              sram_write <= rgzero;
+            end if;
+            if ftdcode(24 downto 21) = x"1" then
+              sram_write <= rg1;
+            end if;
+            if ftdcode(24 downto 21) = x"2" then
+              sram_write <= rg2;
+            end if;
+            if ftdcode(24 downto 21) = x"3" then
+              sram_write <= rg3;
+            end if;
+          end if;
+        else
+          sram_go <= '0';
+        end if;
+      else
+        sram_go <= '0';
       end if;
       if state = x"C0" then
         -- pickup groups
