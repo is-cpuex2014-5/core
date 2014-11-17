@@ -91,11 +91,15 @@ architecture cpu_top of top is
       clk : in std_logic;
       execute_ok : out std_logic;
       debug_read : out std_logic_vector(7 downto 0);
+      write_value : out std_logic_vector(31 downto 0);
+      write_addr : out std_logic_vector(19 downto 0);
+      write_ok : out std_logic;
       rx : in std_logic
     );
   end component;
   signal exok : std_logic := '0';
   signal exok_from_read : std_logic;
+  signal top_state : std_logic_vector(2 downto 0) := "000";
   signal hogge : std_logic_vector(7 downto 0);
   signal debug_otpt : std_logic_vector(31 downto 0);
   signal debug_otpt_code : std_logic_vector(2 downto 0);
@@ -105,6 +109,9 @@ architecture cpu_top of top is
   signal u232c_showtype : std_logic_vector(2 downto 0);
   signal u232c_go : std_logic;
   signal u232c_busy : std_logic;
+  signal inputc_write_value : std_logic_vector(31 downto 0);
+  signal inputc_write_addr : std_logic_vector(19 downto 0);
+  signal inputc_write_ok : std_logic;
   signal core_sram_go : std_logic;
   signal core_sram_inst_type : std_logic; --0: read 1: write
   signal core_sram_read : std_logic_vector(31 downto 0);
@@ -116,6 +123,8 @@ architecture cpu_top of top is
   signal sram_read : std_logic_vector(31 downto 0);
   signal sram_write : std_logic_vector(31 downto 0);
   signal sram_addr : std_logic_vector(19 downto 0);
+  signal sigcount : std_logic_vector(3 downto 0) := x"0";
+  signal debug_saved_value : std_logic_vector(31 downto 0);
 begin
   -- HW 実験当時の top より
   ib: IBUFG port map (
@@ -139,6 +148,9 @@ begin
     clk => clk,
     execute_ok => exok_from_read,
     debug_read => debug_otpt_inputc,
+    write_value => inputc_write_value,
+    write_addr => inputc_write_addr,
+    write_ok => inputc_write_ok,
     rx => rs_rx
     );
   core_send: core Port map (
@@ -183,44 +195,102 @@ begin
   cpu_top_main : process
   begin
     if rising_edge(clk) then
-      if u232c_busy = '0' then
-        u232c_data_reg <= debug_otpt;
-        u232c_showtype <= debug_otpt_code;
-        u232c_go <= debug_otpt_signal;
-      else
-        u232c_go <= '0';
-      end if;
-      -- 垂れ流し
-      core_sram_read <= sram_read;
-      if sram_busy = '0' then
-        if core_sram_go = '1' then
-          sram_go <= '1';
-          if core_sram_inst_type = '0' then
-            --read
-            sram_inst_type <= '0';
-            sram_addr <= core_sram_addr;
+      if top_state = "000" then
+        --Input Wait
+        -- Core work OK
+        if sigcount > 0 then
+          if u232c_busy = '0' then
+            if sigcount = x"8" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(31 downto 28);
+            end if;
+            if sigcount = x"7" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(27 downto 24);
+            end if;
+            if sigcount = x"6" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(23 downto 20);
+            end if;
+            if sigcount = x"5" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(19 downto 16);
+            end if;
+            if sigcount = x"4" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(15 downto 12);
+            end if;
+            if sigcount = x"3" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(11 downto 8);
+            end if;
+            if sigcount = x"2" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(7 downto 4);
+            end if;
+            if sigcount = x"1" then
+              u232c_data_reg <= x"0000000" & debug_saved_value(3 downto 0);
+            end if;
+            sigcount <= sigcount - 1;
+            u232c_showtype <= "000";
+            u232c_go <= '1';
           else
+            u232c_go <= '0';
+            
+          end if;
+        else
+          u232c_go <= '0';
+        end if;
+        if exok_from_read = '1' then
+          exok <= '1';
+          top_state <= "001";
+          --if u232c_busy = '0' then
+          --  u232c_data_reg <= x"000000" & debug_otpt_inputc;
+          --  u232c_showtype <= "000";
+          --  u232c_go <= '1';
+          --else
+          --  u232c_go <= '0';
+          --end if;
+        end if;
+        if sram_busy = '0' then
+          if inputc_write_ok = '1' then
+            sram_go <= '1';
             --write
             sram_inst_type <= '1';
-            sram_addr <= core_sram_addr;
-            sram_write <= core_sram_write;
+            sram_addr <= inputc_write_addr;
+            sram_write <= inputc_write_value;
+            debug_saved_value <= inputc_write_value;
+            sigcount <= x"8";
+          else
+            sram_go <= '0';
           end if;
         else
           sram_go <= '0';
         end if;
-      else
-        sram_go <= '0';
       end if;
-      -- Core work OK
-      if exok_from_read = '1' then
-        exok <= '1';
-        --if u232c_busy = '0' then
-        --  u232c_data_reg <= x"000000" & debug_otpt_inputc;
-        --  u232c_showtype <= "000";
-        --  u232c_go <= '1';
-        --else
-        --  u232c_go <= '0';
-        --end if;
+      if top_state = "001" then
+        --Execution
+        if u232c_busy = '0' then
+          u232c_data_reg <= debug_otpt;
+          u232c_showtype <= debug_otpt_code;
+          u232c_go <= debug_otpt_signal;
+        else
+          u232c_go <= '0';
+        end if;
+        -- 垂れ流し
+        core_sram_read <= sram_read;
+        if sram_busy = '0' then
+          if core_sram_go = '1' then
+            sram_go <= '1';
+            if core_sram_inst_type = '0' then
+              --read
+              sram_inst_type <= '0';
+              sram_addr <= core_sram_addr;
+            else
+              --write
+              sram_inst_type <= '1';
+              sram_addr <= core_sram_addr;
+              sram_write <= core_sram_write;
+            end if;
+          else
+            sram_go <= '0';
+          end if;
+        else
+          sram_go <= '0';
+        end if;
       end if;
     end if;
   end process;

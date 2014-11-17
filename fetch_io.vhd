@@ -31,30 +31,15 @@ begin
         if waitwrite = 0 then
           -- load from SRAM
           -- send to core
-          if pc > 4 then
-            --halt (beq s0,s0,s0,3)
-            inst <= x"80000003";
-            --inst <= x"FFFFFFFF"; -- nop
+          inst_sram_addr <= pc(19 downto 0);
+          if inst_sram_request_finished = '1' then
+            inst <= inst_sram_getvalue;
           end if;
-          if pc = 0 then
-            --addi s1,s0,11
-            inst <= x"0220000B";
-          end if;
-          if pc = 1 then
-            --addi s2,s0,13
-            inst <= x"0240000D";
-          end if;
-          if pc = 2 then
-            --nor s3,s1,s2
-            inst <= x"1C624000"; -- 0001 1100 0110 0010 010
-          end if;
-          if pc = 3 then
-            --addi s4,s0,31
-            inst <= x"0280001F";
-          end if;
-          if pc = 4 then
-            --shift s1,s3,s4,1,rotate
-            inst <= x"202680C0"; -- 0010 0000 0010 0110 1000 0000 100 
+          if (inst_fetched = '1') and (inst_sram_getvalue(31 downto 20) = x"FFD") then
+            waitwrite <= x"20000";
+            inst_sram_request <= '0';
+          else
+            inst_sram_request <= '1';
           end if;
         else
           inst <= x"FFFFFFFF";

@@ -23,7 +23,7 @@ begin
   sttmachine: process(clk)
   begin
     if rising_edge(clk) then
-      if state < 10 then
+      if state < 14 then
         if countdown = 1 then
           state <= state + 1;
           countdown <= wtime;
@@ -31,17 +31,20 @@ begin
         else
           countdown <= countdown - 1;
         end if;
+        busy <= '1';
       end if;
-      if state = x"A" then
+      if state = x"E" then
         if countdown = 1 then
           state <= state + 1;
           countdown <= wtime;
           send_buf <= "1" & send_buf(8 downto 1);
+          busy <= '0';
         else
           countdown <= countdown - 1;
+          busy <= '1';
         end if;
       end if;
-      if state = x"B" then
+      if state = x"F" then
         if go = '1' then
           if showtype = "000" then
             send_buf <=  (base_ln + data_reg(3 downto 0)) & "0";
@@ -57,13 +60,11 @@ begin
           end if;
           state <= x"0";
           countdown <= wtime;
+          busy <= '1';
+        else
+          busy <= '0';
         end if;
       end if;
-    end if;
-    if state = x"B" then
-      busy <= '0';
-    else
-      busy <= '1';
     end if;
   end process;
   tx <= send_buf(0);

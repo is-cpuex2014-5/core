@@ -31,30 +31,57 @@ begin
         if waitwrite = 0 then
           -- load from SRAM
           -- send to core
-          if pc > 4 then
-            --halt (beq s0,s0,s0,3)
-            inst <= x"80000003";
+          if pc > 9 then
+            --halt (beq s0,s0,s0)
+            inst <= x"80000000";
             --inst <= x"FFFFFFFF"; -- nop
           end if;
           if pc = 0 then
-            --addi s1,s0,11
-            inst <= x"0220000B";
+            --addi s1,s0,5
+            --inst <= x"02200005";
+            --load s1,s0,0
+            inst <= x"C0200000";
           end if;
+
           if pc = 1 then
-            --addi s2,s0,13
-            inst <= x"0240000D";
+            --debug write 0 s1
+            inst <= x"FFDFFF01";
+            waitwrite <= x"20000";
           end if;
           if pc = 2 then
-            --nor s3,s1,s2
-            inst <= x"1C624000"; -- 0001 1100 0110 0010 010
+            --store s1,s0,0
+            inst <= x"C2200000";
           end if;
           if pc = 3 then
-            --addi s4,s0,31
-            inst <= x"0280001F";
+            --addi s1,s0,1
+            inst <= x"02200001";
           end if;
           if pc = 4 then
-            --shift s1,s3,s4,1,rotate
-            inst <= x"202680C0"; -- 0010 0000 0010 0110 1000 0000 100 
+            --debug write 0 s1
+            inst <= x"FFDFFF01";
+            waitwrite <= x"20000";
+          end if;
+          if pc = 5 then
+            --store s1,s0,0
+            inst <= x"C2200001";
+          end if;
+          if pc = 6 then
+            --load s1,s0,0
+            inst <= x"C0200000";
+          end if;
+          if pc = 7 then
+            --debug write 0 s1
+            inst <= x"FFDFFF01";
+            waitwrite <= x"20000";
+          end if;
+          if pc = 8 then
+            --load s1,s0,1
+            inst <= x"C0200001";
+          end if;
+          if pc = 9 then
+            --debug write 0 s1
+            inst <= x"FFDFFF01";
+            waitwrite <= x"20000";
           end if;
         else
           inst <= x"FFFFFFFF";

@@ -121,19 +121,15 @@ begin
             inst <= x"FFDFFF11";
             waitwrite <= x"20000";
           end if;
-          --inst_sram_addr <= pc(19 downto 0);
-          --if inst_sram_request_finished = '1' then
-          --  inst <= inst_sram_getvalue;
-          --end if;
-          --if (inst_fetched = '1') and (inst_sram_getvalue(31 downto 20) = x"FFD") then
-          --  waitwrite <= x"20000";
-          --  inst_sram_request <= '0';
-          --else
-          --  inst_sram_request <= '1';
-          --end if;
         else
           inst <= x"FFFFFFFF";
         end if;
+          if pc = 4 then
+            --beq s3,s0,s4
+            inst <= x"80608000";
+            --beq s0,s0,s1 (=b)
+            --inst <= x"80002000";
+          end if;
       end if;
       if waitwrite > 0 then
         waitwrite <= waitwrite - 1;
