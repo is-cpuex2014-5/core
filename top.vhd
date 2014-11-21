@@ -125,6 +125,8 @@ architecture cpu_top of top is
   signal sram_addr : std_logic_vector(19 downto 0);
   signal sigcount : std_logic_vector(3 downto 0) := x"0";
   signal debug_saved_value : std_logic_vector(31 downto 0);
+  -- wait one clock to wait u232c's busy
+  signal debug_waitoneclock : std_logic := '0';
 begin
   -- HW 実験当時の top より
   ib: IBUFG port map (
@@ -199,7 +201,8 @@ begin
         --Input Wait
         -- Core work OK
         if sigcount > 0 then
-          if u232c_busy = '0' then
+          if (u232c_busy = '0') and (debug_waitoneclock = '0') then
+            debug_waitoneclock <= '1';
             if sigcount = x"8" then
               u232c_data_reg <= x"0000000" & debug_saved_value(31 downto 28);
             end if;
@@ -229,10 +232,11 @@ begin
             u232c_go <= '1';
           else
             u232c_go <= '0';
-            
+            debug_waitoneclock <= '0';
           end if;
         else
           u232c_go <= '0';
+          debug_waitoneclock <= '0';
         end if;
         if exok_from_read = '1' then
           exok <= '1';

@@ -100,6 +100,7 @@ architecture cocore of core is
   signal loaded_srca : std_logic_vector(31 downto 0);
   signal loaded_srcb : std_logic_vector(31 downto 0);
   signal loaded_newpc : std_logic_vector(31 downto 0);
+  signal read_index : std_logic_vector(19 downto 0) := x"00000";
 begin
   with_fetch: fetch Port map (
       clk => clk,
@@ -382,21 +383,36 @@ begin
             reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
             opccode_alu <= "0000000";
           end if;
-          if ftdcode(31 downto 20) = x"FFD" then
-            -- Debug Output
-            if ftdcode(3 downto 0) = x"1" then
+          if ftdcode(31 downto 25) = "1110001" then
+            -- write
+            if ftdcode(24 downto 21) = x"1" then
               debug_otpt <= rg1;
             end if;
-            if ftdcode(3 downto 0) = x"2" then
+            if ftdcode(24 downto 21) = x"2" then
               debug_otpt <= rg2;
             end if;
-            if ftdcode(3 downto 0) = x"3" then
+            if ftdcode(24 downto 21) = x"3" then
               debug_otpt <= rg3;
             end if;
-            debug_otpt_code <= ftdcode(6 downto 4);
+            debug_otpt_code <= "000";
             debug_otpt_signal <= '1';
           else
-            debug_otpt_signal <= '0';
+            if ftdcode(31 downto 20) = x"FFD" then
+            -- Debug Output
+              if ftdcode(3 downto 0) = x"1" then
+                debug_otpt <= rg1;
+              end if;
+              if ftdcode(3 downto 0) = x"2" then
+                debug_otpt <= rg2;
+              end if;
+              if ftdcode(3 downto 0) = x"3" then
+                debug_otpt <= rg3;
+              end if;
+              debug_otpt_code <= ftdcode(6 downto 4);
+              debug_otpt_signal <= '1';
+            else
+              debug_otpt_signal <= '0';
+            end if;
           end if;
           -- Debug NOP(all FFFFFFF case doesn't update PC)
         else
@@ -424,6 +440,12 @@ begin
             end if;
           end if;
           if ftdcode(31 downto 25) = "1100000" then
+            --load
+            if ftdcode(24 downto 21) = x"1" then
+              rg1 <= sram_read;
+            end if;
+          end if;
+          if ftdcode(31 downto 25) = "1110000" then
             --read
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= sram_read;
@@ -483,6 +505,13 @@ begin
             if ftdcode(24 downto 21) = x"3" then
               sram_write <= rg3;
             end if;
+          end if;
+          if ftdcode(31 downto 25) = "1110000" then
+            --read
+            sram_go <= '1';
+            sram_addr <= read_index;
+            read_index <= read_index + 1;
+            sram_inst_type <= '0';
           end if;
         else
           sram_go <= '0';

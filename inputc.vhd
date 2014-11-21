@@ -37,7 +37,7 @@ begin
     if rising_edge(clk) then
       if state = 10 then
         if rx = '0' then
-          countdown <= x"1C05";
+          countdown <= x"1ADA";
           state <= x"0";
           readbuf <= x"00";
         end if;
@@ -68,7 +68,7 @@ begin
         if countdown = 0 then
           -- move to next state
           state <= state + 1;
-          countdown <= x"1C06";
+          countdown <= x"1ADA";
           readcount <= x"0000";
           readzero <= "000";
           readone <= "000";

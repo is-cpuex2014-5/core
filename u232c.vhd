@@ -16,14 +16,14 @@ end u232c;
 
 architecture blkbx of u232c is
   signal send_buf : std_logic_vector(8 downto 0) := "111111111";
-  signal state : std_logic_vector(3 downto 0) := x"B";
+  signal state : std_logic_vector(3 downto 0) := x"A";
   signal countdown : std_logic_vector(15 downto 0) := x"0000";
   signal base_ln : std_logic_vector(7 downto 0) := x"30";
 begin
   sttmachine: process(clk)
   begin
     if rising_edge(clk) then
-      if state < 14 then
+      if state < 9 then
         if countdown = 1 then
           state <= state + 1;
           countdown <= wtime;
@@ -33,9 +33,9 @@ begin
         end if;
         busy <= '1';
       end if;
-      if state = x"E" then
+      if state = x"9" then
         if countdown = 1 then
-          state <= state + 1;
+          state <= x"A";
           countdown <= wtime;
           send_buf <= "1" & send_buf(8 downto 1);
           busy <= '0';
@@ -44,7 +44,7 @@ begin
           busy <= '1';
         end if;
       end if;
-      if state = x"F" then
+      if state = x"A" then
         if go = '1' then
           if showtype = "000" then
             send_buf <=  (base_ln + data_reg(3 downto 0)) & "0";
