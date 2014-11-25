@@ -53,9 +53,17 @@ architecture cocore of core is
     cond_out : out std_logic
   );
   end component;
--- registers
+  component fpu_man Port (
+    clk : in std_logic;
+    opc_fpu : in std_logic_vector(6 downto 0);
+    reg_in_a : in std_logic_vector(31 downto 0);
+    reg_in_b : in std_logic_vector(31 downto 0);
+    reg_out : out std_logic_vector(31 downto 0)
+  );
+  end component;
+  -- registers
   signal rgzero : std_logic_vector(31 downto 0) := x"00000000";
-  signal rg1 : std_logic_vector(31 downto 0) := x"00000007";
+  signal rg1 : std_logic_vector(31 downto 0) := x"00000000";
   signal rg2 : std_logic_vector(31 downto 0) := x"00000000";
   signal rg3 : std_logic_vector(31 downto 0) := x"00000000";
   signal rg4 : std_logic_vector(31 downto 0) := x"00000000";
@@ -67,14 +75,29 @@ architecture cocore of core is
   signal rgA : std_logic_vector(31 downto 0) := x"00000000";
   signal rgB : std_logic_vector(31 downto 0) := x"00000000";
   signal rgC : std_logic_vector(31 downto 0) := x"00000000";
-  signal rgD : std_logic_vector(31 downto 0) := x"00000000";
-  signal rgE : std_logic_vector(31 downto 0) := x"00000000";
-  signal rgF : std_logic_vector(31 downto 0) := x"00000000";
+  signal hp : std_logic_vector(31 downto 0) := x"00055555";
+  signal sp : std_logic_vector(31 downto 0) := x"000AAAAA";
+  signal pc : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpzero : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp1 : std_logic_vector(31 downto 0) := x"00000001";
+  signal fp2 : std_logic_vector(31 downto 0) := x"00000002";
+  signal fp3 : std_logic_vector(31 downto 0) := x"00000008";
+  signal fp4 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp5 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp6 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp7 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp8 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp9 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpA : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpB : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpC : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpD : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpE : std_logic_vector(31 downto 0) := x"00000000";
+  signal fpret : std_logic_vector(31 downto 0) := x"00000000";
 -- signals
   signal state : std_logic_vector(7 downto 0) := x"C0";
   signal phase : std_logic_vector(2 downto 0) := "111";
     --phase: active phase (without pipelines)
-  signal pc : std_logic_vector(31 downto 0) := x"00000000";
   signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
   signal ldsig : std_logic := '0';
   signal inst_from_fetch : std_logic_vector(31 downto 0);
@@ -92,6 +115,10 @@ architecture cocore of core is
   signal shift_dir : std_logic;
   signal shift_type : std_logic_vector(1 downto 0);
   signal shift_go : std_logic := '0';
+  signal opccode_fpu : std_logic_vector(6 downto 0);
+  signal reg_in_a_fpu : std_logic_vector(31 downto 0);
+  signal reg_in_b_fpu : std_logic_vector(31 downto 0);
+  signal reg_out_fpu : std_logic_vector(31 downto 0);
   signal opccode_compr : std_logic_vector(6 downto 0);
   signal reg_in_a_compr : std_logic_vector(31 downto 0);
   signal reg_in_b_compr : std_logic_vector(31 downto 0);
@@ -129,6 +156,13 @@ begin
       reg_in_a => reg_in_a_compr,
       reg_in_b => reg_in_b_compr,
       cond_out => cond_out_compr
+    );
+  with_fpu: fpu_man Port map (
+      clk => clk,
+      opc_fpu => opccode_fpu,
+      reg_in_a => reg_in_a_fpu,
+      reg_in_b => reg_in_b_fpu,
+      reg_out => reg_out_fpu
     );
   core_pro: process(clk)
   begin
@@ -223,6 +257,59 @@ begin
               end if;
             end if;
           end if;
+          --FPU
+          if ftdcode(31 downto 30) = "01" then
+            --set source A
+            if ftdcode(20 downto 17) = x"0" then
+              loaded_srca <= fpzero;
+            end if;
+            if ftdcode(20 downto 17) = x"1" then
+              loaded_srca <= fp1;
+            end if;
+            if ftdcode(20 downto 17) = x"2" then
+              loaded_srca <= fp2;
+            end if;
+            if ftdcode(20 downto 17) = x"3" then
+              loaded_srca <= fp3;
+            end if;
+            if ftdcode(20 downto 17) = x"4" then
+              loaded_srca <= fp4;
+            end if;
+            if ftdcode(20 downto 17) = x"5" then
+              loaded_srca <= fp5;
+            end if;
+            if ftdcode(20 downto 17) = x"6" then
+              loaded_srca <= fp6;
+            end if;
+            if ftdcode(20 downto 17) = x"7" then
+              loaded_srca <= fp7;
+            end if;
+            --set source B
+            if ftdcode(16 downto 13) = x"0" then
+              loaded_srcb <= fpzero;
+            end if;
+            if ftdcode(16 downto 13) = x"1" then
+              loaded_srcb <= fp1;
+            end if;
+            if ftdcode(16 downto 13) = x"2" then
+              loaded_srcb <= fp2;
+            end if;
+            if ftdcode(16 downto 13) = x"3" then
+              loaded_srcb <= fp3;
+            end if;
+            if ftdcode(16 downto 13) = x"4" then
+              loaded_srcb <= fp4;
+            end if;
+            if ftdcode(16 downto 13) = x"5" then
+              loaded_srcb <= fp5;
+            end if;
+            if ftdcode(16 downto 13) = x"6" then
+              loaded_srcb <= fp6;
+            end if;
+            if ftdcode(16 downto 13) = x"7" then
+              loaded_srcb <= fp7;
+            end if;
+          end if;
           --Branch
           if ftdcode(31 downto 30) = "10" then
             --set source A
@@ -314,6 +401,12 @@ begin
               shift_type <= ftdcode(6 downto 5);
               shift_go <= '1';
             end if;
+          end if;
+          --FPU
+          if ftdcode(31 downto 30) = "01" then
+            opccode_fpu <= ftdcode(31 downto 25);
+            reg_in_a_fpu <= loaded_srca;
+            reg_in_b_fpu <= loaded_srcb;
           end if;
           --Branch
           if ftdcode(31 downto 30) = "10" then
@@ -422,6 +515,7 @@ begin
         if phase = "100" then
           --MEMORY
           --Phase Store
+          --ALU
           if ftdcode(31 downto 30) = "00" then
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= reg_out;
@@ -437,6 +531,24 @@ begin
             end if;
             if ftdcode(24 downto 21) = x"5" then
               rg5 <= reg_out;
+            end if;
+          end if;
+          --FPU
+          if ftdcode(31 downto 30) = "01" then
+            if ftdcode(24 downto 21) = x"1" then
+              fp1 <= reg_out_fpu;
+            end if;
+            if ftdcode(24 downto 21) = x"2" then
+              fp2 <= reg_out_fpu;
+            end if;
+            if ftdcode(24 downto 21) = x"3" then
+              fp3 <= reg_out_fpu;
+            end if;
+            if ftdcode(24 downto 21) = x"4" then
+              fp4 <= reg_out_fpu;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              fp5 <= reg_out_fpu;
             end if;
           end if;
           if ftdcode(31 downto 25) = "1100000" then
