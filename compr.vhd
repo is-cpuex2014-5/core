@@ -32,10 +32,26 @@ begin
         end if;
       end if;
       if (opc_compr = "1000010") or (opc_compr = "1000011") then
-        if reg_in_a < reg_in_b then
-          cond_out <= '1';
+        if reg_in_a(31) = reg_in_b(31) then
+          if reg_in_a(31) = '0' then
+            if reg_in_a < reg_in_b then
+              cond_out <= '1';
+            else
+              cond_out <= '0';
+            end if;
+          else
+            if reg_in_a > reg_in_b then
+              cond_out <= '1';
+            else
+              cond_out <= '0';
+            end if;
+          end if;
         else
-          cond_out <= '0';
+          if reg_in_a(31) = '0' then
+            cond_out <= '1';
+          else
+            cond_out <= '0';
+          end if;
         end if;
       end if;
     end if;

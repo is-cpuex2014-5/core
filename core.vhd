@@ -75,8 +75,8 @@ architecture cocore of core is
   signal rgA : std_logic_vector(31 downto 0) := x"00000000";
   signal rgB : std_logic_vector(31 downto 0) := x"00000000";
   signal rgC : std_logic_vector(31 downto 0) := x"00000000";
-  signal hp : std_logic_vector(31 downto 0) := x"00055555";
-  signal sp : std_logic_vector(31 downto 0) := x"000AAAAA";
+  signal hp : std_logic_vector(31 downto 0) := x"00055550";
+  signal sp : std_logic_vector(31 downto 0) := x"000AAAA0";
   signal pc : std_logic_vector(31 downto 0) := x"00000000";
   signal fpzero : std_logic_vector(31 downto 0) := x"00000000";
   signal fp1 : std_logic_vector(31 downto 0) := x"00000001";
@@ -95,7 +95,7 @@ architecture cocore of core is
   signal fpE : std_logic_vector(31 downto 0) := x"00000000";
   signal fpret : std_logic_vector(31 downto 0) := x"00000000";
 -- signals
-  signal state : std_logic_vector(7 downto 0) := x"C0";
+  signal state : std_logic_vector(3 downto 0) := x"0";
   signal phase : std_logic_vector(2 downto 0) := "111";
     --phase: active phase (without pipelines)
   signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
@@ -169,7 +169,7 @@ begin
     if (rising_edge(clk)) and (execute_ok = '1') then
       -- state action one
       ldsig <= '1';
-      if state = x"00" then
+      if state = x"0" then
         -- initialize groups
         if phase = "000" then
           --Phase Fetch
@@ -216,6 +216,30 @@ begin
             if ftdcode(20 downto 17) = x"7" then
               loaded_srca <= rg7;
             end if;
+            if ftdcode(20 downto 17) = x"8" then
+              loaded_srca <= rg8;
+            end if;
+            if ftdcode(20 downto 17) = x"9" then
+              loaded_srca <= rg9;
+            end if;
+            if ftdcode(20 downto 17) = x"A" then
+              loaded_srca <= rgA;
+            end if;
+            if ftdcode(20 downto 17) = x"B" then
+              loaded_srca <= rgB;
+            end if;
+            if ftdcode(20 downto 17) = x"C" then
+              loaded_srca <= rgC;
+            end if;
+            if ftdcode(20 downto 17) = x"D" then
+              loaded_srca <= hp;
+            end if;
+            if ftdcode(20 downto 17) = x"E" then
+              loaded_srca <= sp;
+            end if;
+            if ftdcode(20 downto 17) = x"F" then
+              loaded_srca <= pc;
+            end if;
             --set source B
             if (ftdcode(31 downto 25) = "0000001") or (ftdcode(31 downto 25) = "0000011") or (ftdcode(31 downto 25) = "0010001") then
               --immediate
@@ -254,6 +278,30 @@ begin
               end if;
               if ftdcode(16 downto 13) = x"7" then
                 loaded_srcb <= rg7;
+              end if;
+              if ftdcode(16 downto 13) = x"8" then
+                loaded_srcb <= rg8;
+              end if;
+              if ftdcode(16 downto 13) = x"9" then
+                loaded_srcb <= rg9;
+              end if;
+              if ftdcode(16 downto 13) = x"A" then
+                loaded_srcb <= rgA;
+              end if;
+              if ftdcode(16 downto 13) = x"B" then
+                loaded_srcb <= rgB;
+              end if;
+              if ftdcode(16 downto 13) = x"C" then
+                loaded_srcb <= rgC;
+              end if;
+              if ftdcode(20 downto 17) = x"D" then
+                loaded_srcb <= hp;
+              end if;
+              if ftdcode(20 downto 17) = x"E" then
+                loaded_srcb <= sp;
+              end if;
+              if ftdcode(20 downto 17) = x"F" then
+                loaded_srcb <= pc;
               end if;
             end if;
           end if;
@@ -337,6 +385,30 @@ begin
             if ftdcode(24 downto 21) = x"7" then
               loaded_srca <= rg7;
             end if;
+            if ftdcode(24 downto 21) = x"8" then
+              loaded_srca <= rg8;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              loaded_srca <= rg9;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              loaded_srca <= rgA;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              loaded_srca <= rgB;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              loaded_srca <= rgC;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              loaded_srca <= hp;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              loaded_srca <= sp;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              loaded_srca <= pc;
+            end if;
             --set source B
             if ftdcode(20 downto 17) = x"0" then
               loaded_srcb <= rgzero;
@@ -362,6 +434,30 @@ begin
             if ftdcode(20 downto 17) = x"7" then
               loaded_srcb <= rg7;
             end if;
+            if ftdcode(20 downto 17) = x"8" then
+              loaded_srcb <= rg8;
+            end if;
+            if ftdcode(20 downto 17) = x"9" then
+              loaded_srcb <= rg9;
+            end if;
+            if ftdcode(20 downto 17) = x"A" then
+              loaded_srcb <= rgA;
+            end if;
+            if ftdcode(20 downto 17) = x"B" then
+              loaded_srcb <= rgB;
+            end if;
+            if ftdcode(20 downto 17) = x"C" then
+              loaded_srcb <= rgC;
+            end if;
+            if ftdcode(20 downto 17) = x"D" then
+              loaded_srcb <= hp;
+            end if;
+            if ftdcode(20 downto 17) = x"E" then
+              loaded_srcb <= sp;
+            end if;
+            if ftdcode(20 downto 17) = x"F" then
+              loaded_srcb <= pc;
+            end if;
             --set newpc
             if ftdcode(16 downto 13) = x"0" then
               loaded_newpc <= rgzero;
@@ -386,6 +482,30 @@ begin
             end if;
             if ftdcode(16 downto 13) = x"7" then
               loaded_newpc <= rg7;
+            end if;
+            if ftdcode(16 downto 13) = x"8" then
+              loaded_newpc <= rg8;
+            end if;
+            if ftdcode(16 downto 13) = x"9" then
+              loaded_newpc <= rg9;
+            end if;
+            if ftdcode(16 downto 13) = x"A" then
+              loaded_newpc <= rgA;
+            end if;
+            if ftdcode(16 downto 13) = x"B" then
+              loaded_newpc <= rgB;
+            end if;
+            if ftdcode(16 downto 13) = x"C" then
+              loaded_newpc <= rgC;
+            end if;
+            if ftdcode(16 downto 13) = x"D" then
+              loaded_newpc <= hp;
+            end if;
+            if ftdcode(16 downto 13) = x"E" then
+              loaded_newpc <= sp;
+            end if;
+            if ftdcode(16 downto 13) = x"F" then
+              loaded_newpc <= pc;
             end if;
           end if;
         end if;
@@ -448,11 +568,45 @@ begin
             if ftdcode(20 downto 17) = x"5" then
               reg_in_a <= rg5;
             end if;
+            if ftdcode(20 downto 17) = x"6" then
+              reg_in_a <= rg6;
+            end if;
+            if ftdcode(20 downto 17) = x"7" then
+              reg_in_a <= rg7;
+            end if;
+            if ftdcode(20 downto 17) = x"8" then
+              reg_in_a <= rg8;
+            end if;
+            if ftdcode(20 downto 17) = x"9" then
+              reg_in_a <= rg9;
+            end if;
+            if ftdcode(20 downto 17) = x"A" then
+              reg_in_a <= rgA;
+            end if;
+            if ftdcode(20 downto 17) = x"B" then
+              reg_in_a <= rgB;
+            end if;
+            if ftdcode(20 downto 17) = x"C" then
+              reg_in_a <= rgC;
+            end if;
+            if ftdcode(20 downto 17) = x"D" then
+              reg_in_a <= hp;
+            end if;
+            if ftdcode(20 downto 17) = x"E" then
+              reg_in_a <= sp;
+            end if;
+            if ftdcode(20 downto 17) = x"F" then
+              reg_in_a <= pc;
+            end if;
             --register B
-            reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            if ftdcode(16) = '1' then
+              reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+            else
+              reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            end if;
             opccode_alu <= "0000000";
           end if;
-          if ftdcode(31 downto 25) = "1100001" then
+          if ftdcode(31 downto 25) = "1100010" then
             --store
             if ftdcode(20 downto 17) = x"0" then
               reg_in_a <= rgzero;
@@ -472,8 +626,42 @@ begin
             if ftdcode(20 downto 17) = x"5" then
               reg_in_a <= rg5;
             end if;
+            if ftdcode(20 downto 17) = x"6" then
+              reg_in_a <= rg6;
+            end if;
+            if ftdcode(20 downto 17) = x"7" then
+              reg_in_a <= rg7;
+            end if;
+            if ftdcode(20 downto 17) = x"8" then
+              reg_in_a <= rg8;
+            end if;
+            if ftdcode(20 downto 17) = x"9" then
+              reg_in_a <= rg9;
+            end if;
+            if ftdcode(20 downto 17) = x"A" then
+              reg_in_a <= rgA;
+            end if;
+            if ftdcode(20 downto 17) = x"B" then
+              reg_in_a <= rgB;
+            end if;
+            if ftdcode(20 downto 17) = x"C" then
+              reg_in_a <= rgC;
+            end if;
+            if ftdcode(20 downto 17) = x"D" then
+              reg_in_a <= hp;
+            end if;
+            if ftdcode(20 downto 17) = x"E" then
+              reg_in_a <= sp;
+            end if;
+            if ftdcode(20 downto 17) = x"F" then
+              reg_in_a <= pc;
+            end if;
             --register B
-            reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            if ftdcode(16) = '1' then
+              reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+            else
+              reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+            end if;
             opccode_alu <= "0000000";
           end if;
           if ftdcode(31 downto 25) = "1110001" then
@@ -532,6 +720,36 @@ begin
             if ftdcode(24 downto 21) = x"5" then
               rg5 <= reg_out;
             end if;
+            if ftdcode(24 downto 21) = x"6" then
+              rg6 <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"7" then
+              rg7 <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"8" then
+              rg8 <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              rg9 <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              rgA <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              rgB <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              rgC <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              hp <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              sp <= reg_out;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              pc <= reg_out;
+            end if;
           end if;
           --FPU
           if ftdcode(31 downto 30) = "01" then
@@ -556,11 +774,95 @@ begin
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= sram_read;
             end if;
+            if ftdcode(24 downto 21) = x"2" then
+              rg2 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"3" then
+              rg3 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"4" then
+              rg4 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              rg5 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"6" then
+              rg6 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"7" then
+              rg7 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"8" then
+              rg8 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              rg9 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              rgA <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              rgB <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              rgC <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              hp <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              sp <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              pc <= sram_read;
+            end if;
           end if;
           if ftdcode(31 downto 25) = "1110000" then
             --read
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"2" then
+              rg2 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"3" then
+              rg3 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"4" then
+              rg4 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              rg5 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"6" then
+              rg6 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"7" then
+              rg7 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"8" then
+              rg8 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              rg9 <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              rgA <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              rgB <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              rgC <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              hp <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              sp <= sram_read;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              pc <= sram_read;
             end if;
           end if;
           --Update PC (Branch case)
@@ -570,7 +872,7 @@ begin
             if ftdcode(31 downto 0) = x"FFFFFFFF" then
               -- added nop
             else
-              pc <= pc + 1;
+              pc <= pc + 4;
             end if;
           end if;
         end if;
@@ -578,13 +880,13 @@ begin
         -- the case state != 0
         debug_otpt_signal <= '0';
       end if;
-      if state = x"01" then
+      if state = x"1" then
         sram_go <= '0';
         inputc_fetched <= '0';
         shift_go <= '0';
       end if;
       -- state action two
-      if state = x"80" then
+      if state = x"8" then
         if phase = "000" then
           --Phase Fetch
           if inputc_sram_request_get = '1' then
@@ -600,7 +902,7 @@ begin
             sram_addr <= reg_out(19 downto 0);
             sram_inst_type <= '0';
           end if;
-          if ftdcode(31 downto 25) = "1100001" then
+          if ftdcode(31 downto 25) = "1100010" then
             --store
             sram_go <= '1';
             sram_inst_type <= '1';
@@ -617,6 +919,42 @@ begin
             if ftdcode(24 downto 21) = x"3" then
               sram_write <= rg3;
             end if;
+            if ftdcode(24 downto 21) = x"4" then
+              sram_write <= rg4;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              sram_write <= rg5;
+            end if;
+            if ftdcode(24 downto 21) = x"6" then
+              sram_write <= rg6;
+            end if;
+            if ftdcode(24 downto 21) = x"7" then
+              sram_write <= rg7;
+            end if;
+            if ftdcode(24 downto 21) = x"8" then
+              sram_write <= rg8;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              sram_write <= rg9;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              sram_write <= rgA;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              sram_write <= rgB;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              sram_write <= rgC;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              sram_write <= hp;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              sram_write <= sp;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              sram_write <= pc;
+            end if;
           end if;
           if ftdcode(31 downto 25) = "1110000" then
             --read
@@ -629,12 +967,12 @@ begin
           sram_go <= '0';
         end if;
       end if;
-      if state = x"81" then
+      if state = x"9" then
         --reflesh
         sram_go <= '0';
         inputc_sram_request_finished <= '0';
       end if;
-      if state = x"C0" then
+      if state = x"C" then
         -- pickup groups
         -- Update cond_new_pc
         if phase = "011" then
@@ -642,19 +980,19 @@ begin
           if cond_out_compr = '1' then
             cond_new_pc <= reg_out;
           else
-            cond_new_pc <= pc + 1;
+            cond_new_pc <= pc + 4;
           end if;
         end if;
       end if;
       --if state = x"BB" then
       --  debug_otpt <= reg_out;
       --end if;
-      if state = x"FF" then
+      if state = x"F" then
         -- move to next phase
         phase <= phase + 1;
       end if;
       state <= state + 1;
-      ostate <= state + 1;
+      ostate <= "00000000" + state + 1;
     end if;
   end process;
 end cocore;
