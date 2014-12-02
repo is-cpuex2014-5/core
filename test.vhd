@@ -76,7 +76,6 @@ begin
       sram_go_x <= '1';
       sram_inst_type_x <= sram_inst_type_c;
       sram_addr_x <= sram_addr_c;
-      sram_read_c <= sram_read_x;
       sram_write_x <= sram_write_c;
       sram_wait <= "11";
     else
@@ -84,6 +83,7 @@ begin
         sram_wait <= sram_wait - 1;
         sram_go_x <= '1';
       else
+        sram_read_c <= sram_read_x;
         sram_go_x <= '0';
       end if;
     end if;
