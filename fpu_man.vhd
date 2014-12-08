@@ -50,7 +50,7 @@ architecture fpu_man_main of fpu_man is
     Q : out std_logic_vector(31 downto 0)
   );
   end component;
-  component itof Port (
+  component i2f Port (
     A : in std_logic_vector(31 downto 0);
     CLK : in std_logic;
     Q : out std_logic_vector(31 downto 0)
@@ -130,7 +130,7 @@ begin
     CLK => clk,
     Q => ret_floor
   );
-  with_itof : itof Port map(
+  with_i2f : i2f Port map(
     A => a_itof,
     CLK => clk,
     Q => ret_itof

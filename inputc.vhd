@@ -28,9 +28,7 @@ architecture blkbx of inputc is
   signal readzero : std_logic_vector(2 downto 0) := "000";
   signal readone : std_logic_vector(2 downto 0) := "000";
   signal base_ln : std_logic_vector(7 downto 0) := x"30";
-  signal readbufforreg : std_logic_vector(31 downto 0) := x"00000000";
-  signal readsum : std_logic_vector(2 downto 0) := "000";
-  signal next_write_addr : std_logic_vector(19 downto 0) := x"00000";
+  signal next_write_addr : std_logic_vector(19 downto 0) := x"55555";
 begin
   sttmachine: process(clk)
   begin
@@ -83,26 +81,10 @@ begin
               execute_ok <= '1';
               write_ok <= '0';
             else
-              if readsum < 7 then
-                if readbuf>64 then
-                  readbufforreg <= (readbufforreg(27 downto 0) & "0000") + (readbuf-55);
-                else
-                  readbufforreg <= (readbufforreg(27 downto 0) & "0000") + (readbuf-48);
-                end if;
-                readsum <= readsum + 1;
-                write_ok <= '0';
-              else
-                if readbuf>64 then
-                  write_value <= (readbufforreg(27 downto 0) & "0000") + (readbuf-55);
-                else
-                  write_value <= (readbufforreg(27 downto 0) & "0000") + (readbuf-48);
-                end if;
-                write_addr <= next_write_addr;
-                write_ok <= '1';
-                next_write_addr <= next_write_addr + 1;
-                readsum <= "000";
-                readbufforreg <= x"00000000";
-              end if;
+              write_value <= x"00000000" + readbuf;
+              write_addr <= next_write_addr;
+              write_ok <= '1';
+              next_write_addr <= next_write_addr + 1;
             end if;
             debug_read <= readbuf;
           else

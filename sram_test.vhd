@@ -23,9 +23,32 @@ begin
     if rising_edge(clk) then
       if sram_go = '1' then
         if sram_inst_type = '1' then
-          sram_value(conv_integer(sram_addr(6 downto 2))) <= sram_write;
+          sram_value(conv_integer(sram_addr(4 downto 0))) <= sram_write;
         else
-          sram_read <= sram_value(conv_integer(sram_addr(6 downto 2)));
+if sram_addr = 0 then
+	sram_read <= x"820004E8";
+end if;
+if sram_addr = 4 then
+	sram_read <= x"00000000";
+end if;
+if sram_addr = 8 then
+	sram_read <= x"3F800000";
+end if;
+if sram_addr = 12 then
+	sram_read <= x"3FC00000";
+end if;
+if sram_addr = 16 then
+	sram_read <= x"43C80000";
+end if;
+if sram_addr = 20 then
+	sram_read <= x"40800000";
+end if;
+if sram_addr = 24 then
+	sram_read <= x"E0200000";
+end if;
+if sram_addr > 24 then
+          sram_read <= sram_value(conv_integer(sram_addr(4 downto 0)));
+end if;
         end if;
       end if;
     end if;

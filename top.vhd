@@ -45,7 +45,8 @@ architecture cpu_top of top is
     sram_write : out std_logic_vector(31 downto 0);
     debug_otpt: out std_logic_vector(31 downto 0);
     debug_otpt_code: out std_logic_vector(2 downto 0);
-    debug_otpt_signal: out std_logic
+    debug_otpt_signal: out std_logic;
+    waitwrite_from_parent : in std_logic_vector(19 downto 0)
   );
   end component;
   component sram Port (
@@ -125,6 +126,9 @@ architecture cpu_top of top is
   signal sram_addr : std_logic_vector(19 downto 0);
   signal sigcount : std_logic_vector(3 downto 0) := x"0";
   signal debug_saved_value : std_logic_vector(31 downto 0);
+  signal first_state_sram_input_id : std_logic_vector(19 downto 0) := x"00000";
+  signal first_state_write_wait : std_logic_vector(3 downto 0) := x"0";
+  signal waitwrite_to_core : std_logic_vector(19 downto 0) := x"00000";
   -- wait one clock to wait u232c's busy
   signal debug_waitoneclock : std_logic := '0';
 begin
@@ -166,7 +170,8 @@ begin
     sram_addr => core_sram_addr,
     debug_otpt => debug_otpt,
     debug_otpt_code => debug_otpt_code,
-    debug_otpt_signal => debug_otpt_signal
+    debug_otpt_signal => debug_otpt_signal,
+    waitwrite_from_parent => waitwrite_to_core
     );
   withsram: sram Port map (
     clk => clk,
@@ -197,47 +202,13 @@ begin
   cpu_top_main : process
   begin
     if rising_edge(clk) then
+      if u232c_busy = '0' then
+        waitwrite_to_core <= x"00000";
+      else
+        waitwrite_to_core <= x"C0C0A";
+      end if;
       if top_state = "000" then
         --Input Wait
-        -- Core work OK
-        if sigcount > 0 then
-          if (u232c_busy = '0') and (debug_waitoneclock = '0') then
-            debug_waitoneclock <= '1';
-            if sigcount = x"8" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(31 downto 28);
-            end if;
-            if sigcount = x"7" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(27 downto 24);
-            end if;
-            if sigcount = x"6" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(23 downto 20);
-            end if;
-            if sigcount = x"5" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(19 downto 16);
-            end if;
-            if sigcount = x"4" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(15 downto 12);
-            end if;
-            if sigcount = x"3" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(11 downto 8);
-            end if;
-            if sigcount = x"2" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(7 downto 4);
-            end if;
-            if sigcount = x"1" then
-              u232c_data_reg <= x"0000000" & debug_saved_value(3 downto 0);
-            end if;
-            sigcount <= sigcount - 1;
-            u232c_showtype <= "000";
-            u232c_go <= '1';
-          else
-            u232c_go <= '0';
-            debug_waitoneclock <= '0';
-          end if;
-        else
-          u232c_go <= '0';
-          debug_waitoneclock <= '0';
-        end if;
         if exok_from_read = '1' then
           exok <= '1';
           top_state <= "001";
@@ -258,12 +229,33 @@ begin
             sram_write <= inputc_write_value;
             debug_saved_value <= inputc_write_value;
             sigcount <= x"8";
+            if u232c_busy = '0' then
+              u232c_data_reg <= inputc_write_value;
+              u232c_showtype <= "000";
+              u232c_go <= '1';
+            else
+              u232c_go <= '0';
+            end if;
           else
             sram_go <= '0';
           end if;
         else
-          sram_go <= '0';
+            sram_go <= '0';
         end if;
+--        if first_state_write_wait = 0 then
+          -- write in addr
+--          if sram_busy = '0' then
+--            sram_go <= '1';
+--            first_state_sram_input_id <= first_state_sram_input_id + 1;
+--            first_state_write_wait <= x"F";
+--            sram_addr <= first_state_sram_input_id;
+--          else
+--            sram_go <= '0';
+--          end if;
+--        else
+--          first_state_write_wait <= first_state_write_wait - 1;
+--          sram_go <= '0';
+--        end if;
       end if;
       if top_state = "001" then
         --Execution

@@ -16,7 +16,8 @@ entity core is
     sram_write : out std_logic_vector(31 downto 0);
     debug_otpt : out std_logic_vector(31 downto 0);
     debug_otpt_code : out std_logic_vector(2 downto 0);
-    debug_otpt_signal : out std_logic := '0'
+    debug_otpt_signal : out std_logic := '0';
+    waitwrite_from_parent : in std_logic_vector(19 downto 0)
   );
 end core;
 
@@ -31,7 +32,8 @@ architecture cocore of core is
     inst_sram_getvalue : in std_logic_vector(31 downto 0);
     inst_sram_request_finished : in std_logic;
     inst_fetched : in std_logic;
-    inst : out std_logic_vector(31 downto 0)
+    inst : out std_logic_vector(31 downto 0);
+    waitwrite : in std_logic_vector(19 downto 0)
   );
   end component;
   component alu Port (
@@ -75,12 +77,12 @@ architecture cocore of core is
   signal rgA : std_logic_vector(31 downto 0) := x"00000000";
   signal rgB : std_logic_vector(31 downto 0) := x"00000000";
   signal rgC : std_logic_vector(31 downto 0) := x"00000000";
-  signal hp : std_logic_vector(31 downto 0) := x"00055550";
-  signal sp : std_logic_vector(31 downto 0) := x"000AAAA0";
+  signal hp : std_logic_vector(31 downto 0) := x"00155554";
+  signal sp : std_logic_vector(31 downto 0) := x"002AAAA8";
   signal pc : std_logic_vector(31 downto 0) := x"00000000";
   signal fpzero : std_logic_vector(31 downto 0) := x"00000000";
-  signal fp1 : std_logic_vector(31 downto 0) := x"0F000000";
-  signal fp2 : std_logic_vector(31 downto 0) := x"0F000000";
+  signal fp1 : std_logic_vector(31 downto 0) := x"00000000";
+  signal fp2 : std_logic_vector(31 downto 0) := x"00000000";
   signal fp3 : std_logic_vector(31 downto 0) := x"00000000";
   signal fp4 : std_logic_vector(31 downto 0) := x"00000000";
   signal fp5 : std_logic_vector(31 downto 0) := x"00000000";
@@ -128,6 +130,7 @@ architecture cocore of core is
   signal loaded_srcb : std_logic_vector(31 downto 0);
   signal loaded_newpc : std_logic_vector(31 downto 0);
   signal read_index : std_logic_vector(19 downto 0) := x"00000";
+  signal waitwrite_to_fetch : std_logic_vector(19 downto 0) := x"00000";
 begin
   with_fetch: fetch Port map (
       clk => clk,
@@ -138,7 +141,8 @@ begin
       inst_sram_getvalue => inputc_sram_getvalue,
       inst_sram_addr => inputc_sram_addr,
       inst_fetched => inputc_fetched,
-      inst_sram_request_finished => inputc_sram_request_finished
+      inst_sram_request_finished => inputc_sram_request_finished,
+      waitwrite => waitwrite_to_fetch
     );
   with_alu: alu Port map (
       clk => clk,
@@ -167,6 +171,7 @@ begin
   core_pro: process(clk)
   begin
     if (rising_edge(clk)) and (execute_ok = '1') then
+      waitwrite_to_fetch <= waitwrite_from_parent;
       -- state action one
       ldsig <= '1';
       if state = x"0" then
@@ -316,42 +321,42 @@ begin
               if ftdcode(20 downto 17) = x"1" then
                 loaded_srca <= rg1;
               end if;
-            if ftdcode(20 downto 17) = x"2" then
-              loaded_srca <= rg2;
-            end if;
-            if ftdcode(20 downto 17) = x"3" then
-              loaded_srca <= rg3;
-            end if;
-            if ftdcode(20 downto 17) = x"4" then
-              loaded_srca <= rg4;
-            end if;
-            if ftdcode(20 downto 17) = x"5" then
-              loaded_srca <= rg5;
-            end if;
-            if ftdcode(20 downto 17) = x"6" then
-              loaded_srca <= rg6;
-            end if;
-            if ftdcode(20 downto 17) = x"7" then
-              loaded_srca <= rg7;
-            end if;
-            if ftdcode(20 downto 17) = x"8" then
-              loaded_srca <= rg8;
-            end if;
-            if ftdcode(20 downto 17) = x"9" then
-              loaded_srca <= rg9;
-            end if;
-            if ftdcode(20 downto 17) = x"A" then
-              loaded_srca <= rgA;
-            end if;
-            if ftdcode(20 downto 17) = x"B" then
-              loaded_srca <= rgB;
-            end if;
-            if ftdcode(20 downto 17) = x"C" then
-              loaded_srca <= rgC;
-            end if;
-            if ftdcode(20 downto 17) = x"D" then
-              loaded_srca <= hp;
-            end if;
+              if ftdcode(20 downto 17) = x"2" then
+                loaded_srca <= rg2;
+              end if;
+              if ftdcode(20 downto 17) = x"3" then
+                loaded_srca <= rg3;
+              end if;
+              if ftdcode(20 downto 17) = x"4" then
+                loaded_srca <= rg4;
+              end if;
+              if ftdcode(20 downto 17) = x"5" then
+                loaded_srca <= rg5;
+              end if;
+              if ftdcode(20 downto 17) = x"6" then
+                loaded_srca <= rg6;
+              end if;
+              if ftdcode(20 downto 17) = x"7" then
+                loaded_srca <= rg7;
+              end if;
+              if ftdcode(20 downto 17) = x"8" then
+                loaded_srca <= rg8;
+              end if;
+              if ftdcode(20 downto 17) = x"9" then
+                loaded_srca <= rg9;
+              end if;
+              if ftdcode(20 downto 17) = x"A" then
+                loaded_srca <= rgA;
+              end if;
+              if ftdcode(20 downto 17) = x"B" then
+                loaded_srca <= rgB;
+              end if;
+              if ftdcode(20 downto 17) = x"C" then
+                loaded_srca <= rgC;
+              end if;
+              if ftdcode(20 downto 17) = x"D" then
+                loaded_srca <= hp;
+              end if;
               if ftdcode(20 downto 17) = x"E" then
                 loaded_srca <= sp;
               end if;
@@ -368,43 +373,43 @@ begin
               end if;
               if ftdcode(20 downto 17) = x"2" then
                 loaded_srca <= fp2;
-            end if;
-            if ftdcode(20 downto 17) = x"3" then
-              loaded_srca <= fp3;
-            end if;
-            if ftdcode(20 downto 17) = x"4" then
-              loaded_srca <= fp4;
-            end if;
-            if ftdcode(20 downto 17) = x"5" then
-              loaded_srca <= fp5;
-            end if;
-            if ftdcode(20 downto 17) = x"6" then
-              loaded_srca <= fp6;
-            end if;
-            if ftdcode(20 downto 17) = x"7" then
-              loaded_srca <= fp7;
-            end if;
-            if ftdcode(20 downto 17) = x"8" then
-              loaded_srca <= fp8;
-            end if;
-            if ftdcode(20 downto 17) = x"9" then
-              loaded_srca <= fp9;
-            end if;
-            if ftdcode(20 downto 17) = x"A" then
-              loaded_srca <= fpA;
-            end if;
-            if ftdcode(20 downto 17) = x"B" then
-              loaded_srca <= fpB;
-            end if;
-            if ftdcode(20 downto 17) = x"C" then
-              loaded_srca <= fpC;
-            end if;
-            if ftdcode(20 downto 17) = x"D" then
-              loaded_srca <= fpD;
-            end if;
-            if ftdcode(20 downto 17) = x"E" then
-              loaded_srca <= fpE;
-            end if;
+              end if;
+              if ftdcode(20 downto 17) = x"3" then
+                loaded_srca <= fp3;
+              end if;
+              if ftdcode(20 downto 17) = x"4" then
+                loaded_srca <= fp4;
+              end if;
+              if ftdcode(20 downto 17) = x"5" then
+                loaded_srca <= fp5;
+              end if;
+              if ftdcode(20 downto 17) = x"6" then
+                loaded_srca <= fp6;
+              end if;
+              if ftdcode(20 downto 17) = x"7" then
+                loaded_srca <= fp7;
+              end if;
+              if ftdcode(20 downto 17) = x"8" then
+                loaded_srca <= fp8;
+              end if;
+              if ftdcode(20 downto 17) = x"9" then
+                loaded_srca <= fp9;
+              end if;
+              if ftdcode(20 downto 17) = x"A" then
+                loaded_srca <= fpA;
+              end if;
+              if ftdcode(20 downto 17) = x"B" then
+                loaded_srca <= fpB;
+              end if;
+              if ftdcode(20 downto 17) = x"C" then
+                loaded_srca <= fpC;
+              end if;
+              if ftdcode(20 downto 17) = x"D" then
+                loaded_srca <= fpD;
+              end if;
+              if ftdcode(20 downto 17) = x"E" then
+                loaded_srca <= fpE;
+              end if;
               if ftdcode(20 downto 17) = x"F" then
                 loaded_srca <= fpret;
               end if;
@@ -470,94 +475,94 @@ begin
               if ftdcode(24 downto 21) = x"1" then
                 loaded_srca <= fp1;
               end if;
-            if ftdcode(24 downto 21) = x"2" then
-              loaded_srca <= fp2;
-            end if;
-            if ftdcode(24 downto 21) = x"3" then
-              loaded_srca <= fp3;
-            end if;
-            if ftdcode(24 downto 21) = x"4" then
-              loaded_srca <= fp4;
-            end if;
-            if ftdcode(24 downto 21) = x"5" then
-              loaded_srca <= fp5;
-            end if;
-            if ftdcode(24 downto 21) = x"6" then
-              loaded_srca <= fp6;
-            end if;
-            if ftdcode(24 downto 21) = x"7" then
-              loaded_srca <= fp7;
-            end if;
-            if ftdcode(24 downto 21) = x"8" then
-              loaded_srca <= fp8;
-            end if;
-            if ftdcode(24 downto 21) = x"9" then
-              loaded_srca <= fp9;
-            end if;
-            if ftdcode(24 downto 21) = x"A" then
-              loaded_srca <= fpA;
-            end if;
-            if ftdcode(24 downto 21) = x"B" then
-              loaded_srca <= fpB;
-            end if;
-            if ftdcode(24 downto 21) = x"C" then
-              loaded_srca <= fpC;
-            end if;
-            if ftdcode(24 downto 21) = x"D" then
-              loaded_srca <= fpD;
-            end if;
-            if ftdcode(24 downto 21) = x"E" then
-              loaded_srca <= fpE;
-            end if;
-            if ftdcode(24 downto 21) = x"F" then
-              loaded_srca <= fpret;
-            end if;
-            --set source B
-            if ftdcode(20 downto 17) = x"0" then
-              loaded_srcb <= fpzero;
-            end if;
-            if ftdcode(20 downto 17) = x"1" then
-              loaded_srcb <= fp1;
-            end if;
-            if ftdcode(20 downto 17) = x"2" then
-              loaded_srcb <= fp2;
-            end if;
-            if ftdcode(20 downto 17) = x"3" then
-              loaded_srcb <= fp3;
-            end if;
-            if ftdcode(20 downto 17) = x"4" then
-              loaded_srcb <= fp4;
-            end if;
-            if ftdcode(20 downto 17) = x"5" then
-              loaded_srcb <= fp5;
-            end if;
-            if ftdcode(20 downto 17) = x"6" then
-              loaded_srcb <= fp6;
-            end if;
-            if ftdcode(20 downto 17) = x"7" then
-              loaded_srcb <= fp7;
-            end if;
-            if ftdcode(20 downto 17) = x"8" then
-              loaded_srcb <= fp8;
-            end if;
-            if ftdcode(20 downto 17) = x"9" then
-              loaded_srcb <= fp9;
-            end if;
-            if ftdcode(20 downto 17) = x"A" then
-              loaded_srcb <= fpA;
-            end if;
-            if ftdcode(20 downto 17) = x"B" then
-              loaded_srcb <= fpB;
-            end if;
-            if ftdcode(20 downto 17) = x"C" then
-              loaded_srcb <= fpC;
-            end if;
-            if ftdcode(20 downto 17) = x"D" then
-              loaded_srcb <= fpD;
-            end if;
-            if ftdcode(20 downto 17) = x"E" then
-              loaded_srcb <= fpE;
-            end if;
+              if ftdcode(24 downto 21) = x"2" then
+                loaded_srca <= fp2;
+              end if;
+              if ftdcode(24 downto 21) = x"3" then
+                loaded_srca <= fp3;
+              end if;
+              if ftdcode(24 downto 21) = x"4" then
+                loaded_srca <= fp4;
+              end if;
+              if ftdcode(24 downto 21) = x"5" then
+                loaded_srca <= fp5;
+              end if;
+              if ftdcode(24 downto 21) = x"6" then
+                loaded_srca <= fp6;
+              end if;
+              if ftdcode(24 downto 21) = x"7" then
+                loaded_srca <= fp7;
+              end if;
+              if ftdcode(24 downto 21) = x"8" then
+                loaded_srca <= fp8;
+              end if;
+              if ftdcode(24 downto 21) = x"9" then
+                loaded_srca <= fp9;
+              end if;
+              if ftdcode(24 downto 21) = x"A" then
+                loaded_srca <= fpA;
+              end if;
+              if ftdcode(24 downto 21) = x"B" then
+                loaded_srca <= fpB;
+              end if;
+              if ftdcode(24 downto 21) = x"C" then
+                loaded_srca <= fpC;
+              end if;
+              if ftdcode(24 downto 21) = x"D" then
+                loaded_srca <= fpD;
+              end if;
+              if ftdcode(24 downto 21) = x"E" then
+                loaded_srca <= fpE;
+              end if;
+              if ftdcode(24 downto 21) = x"F" then
+                loaded_srca <= fpret;
+              end if;
+              --set source B
+              if ftdcode(20 downto 17) = x"0" then
+                loaded_srcb <= fpzero;
+              end if;
+              if ftdcode(20 downto 17) = x"1" then
+                loaded_srcb <= fp1;
+              end if;
+              if ftdcode(20 downto 17) = x"2" then
+                loaded_srcb <= fp2;
+              end if;
+              if ftdcode(20 downto 17) = x"3" then
+                loaded_srcb <= fp3;
+              end if;
+              if ftdcode(20 downto 17) = x"4" then
+                loaded_srcb <= fp4;
+              end if;
+              if ftdcode(20 downto 17) = x"5" then
+                loaded_srcb <= fp5;
+              end if;
+              if ftdcode(20 downto 17) = x"6" then
+                loaded_srcb <= fp6;
+              end if;
+              if ftdcode(20 downto 17) = x"7" then
+                loaded_srcb <= fp7;
+              end if;
+              if ftdcode(20 downto 17) = x"8" then
+                loaded_srcb <= fp8;
+              end if;
+              if ftdcode(20 downto 17) = x"9" then
+                loaded_srcb <= fp9;
+              end if;
+              if ftdcode(20 downto 17) = x"A" then
+                loaded_srcb <= fpA;
+              end if;
+              if ftdcode(20 downto 17) = x"B" then
+                loaded_srcb <= fpB;
+              end if;
+              if ftdcode(20 downto 17) = x"C" then
+                loaded_srcb <= fpC;
+              end if;
+              if ftdcode(20 downto 17) = x"D" then
+                loaded_srcb <= fpD;
+              end if;
+              if ftdcode(20 downto 17) = x"E" then
+                loaded_srcb <= fpE;
+              end if;
               if ftdcode(20 downto 17) = x"F" then
                 loaded_srcb <= fpret;
               end if;
@@ -570,94 +575,94 @@ begin
               if ftdcode(24 downto 21) = x"1" then
                 loaded_srca <= rg1;
               end if;
-            if ftdcode(24 downto 21) = x"2" then
-              loaded_srca <= rg2;
-            end if;
-            if ftdcode(24 downto 21) = x"3" then
-              loaded_srca <= rg3;
-            end if;
-            if ftdcode(24 downto 21) = x"4" then
-              loaded_srca <= rg4;
-            end if;
-            if ftdcode(24 downto 21) = x"5" then
-              loaded_srca <= rg5;
-            end if;
-            if ftdcode(24 downto 21) = x"6" then
-              loaded_srca <= rg6;
-            end if;
-            if ftdcode(24 downto 21) = x"7" then
-              loaded_srca <= rg7;
-            end if;
-            if ftdcode(24 downto 21) = x"8" then
-              loaded_srca <= rg8;
-            end if;
-            if ftdcode(24 downto 21) = x"9" then
-              loaded_srca <= rg9;
-            end if;
-            if ftdcode(24 downto 21) = x"A" then
-              loaded_srca <= rgA;
-            end if;
-            if ftdcode(24 downto 21) = x"B" then
-              loaded_srca <= rgB;
-            end if;
-            if ftdcode(24 downto 21) = x"C" then
-              loaded_srca <= rgC;
-            end if;
-            if ftdcode(24 downto 21) = x"D" then
-              loaded_srca <= hp;
-            end if;
-            if ftdcode(24 downto 21) = x"E" then
-              loaded_srca <= sp;
-            end if;
-            if ftdcode(24 downto 21) = x"F" then
-              loaded_srca <= pc;
-            end if;
-            --set source B
-            if ftdcode(20 downto 17) = x"0" then
-              loaded_srcb <= rgzero;
-            end if;
-            if ftdcode(20 downto 17) = x"1" then
-              loaded_srcb <= rg1;
-            end if;
-            if ftdcode(20 downto 17) = x"2" then
-              loaded_srcb <= rg2;
-            end if;
-            if ftdcode(20 downto 17) = x"3" then
-              loaded_srcb <= rg3;
-            end if;
-            if ftdcode(20 downto 17) = x"4" then
-              loaded_srcb <= rg4;
-            end if;
-            if ftdcode(20 downto 17) = x"5" then
-              loaded_srcb <= rg5;
-            end if;
-            if ftdcode(20 downto 17) = x"6" then
-              loaded_srcb <= rg6;
-            end if;
-            if ftdcode(20 downto 17) = x"7" then
-              loaded_srcb <= rg7;
-            end if;
-            if ftdcode(20 downto 17) = x"8" then
-              loaded_srcb <= rg8;
-            end if;
-            if ftdcode(20 downto 17) = x"9" then
-              loaded_srcb <= rg9;
-            end if;
-            if ftdcode(20 downto 17) = x"A" then
-              loaded_srcb <= rgA;
-            end if;
-            if ftdcode(20 downto 17) = x"B" then
-              loaded_srcb <= rgB;
-            end if;
-            if ftdcode(20 downto 17) = x"C" then
-              loaded_srcb <= rgC;
-            end if;
-            if ftdcode(20 downto 17) = x"D" then
-              loaded_srcb <= hp;
-            end if;
-            if ftdcode(20 downto 17) = x"E" then
-              loaded_srcb <= sp;
-            end if;
+              if ftdcode(24 downto 21) = x"2" then
+                loaded_srca <= rg2;
+              end if;
+              if ftdcode(24 downto 21) = x"3" then
+                loaded_srca <= rg3;
+              end if;
+              if ftdcode(24 downto 21) = x"4" then
+                loaded_srca <= rg4;
+              end if;
+              if ftdcode(24 downto 21) = x"5" then
+                loaded_srca <= rg5;
+              end if;
+              if ftdcode(24 downto 21) = x"6" then
+                loaded_srca <= rg6;
+              end if;
+              if ftdcode(24 downto 21) = x"7" then
+                loaded_srca <= rg7;
+              end if;
+              if ftdcode(24 downto 21) = x"8" then
+                loaded_srca <= rg8;
+              end if;
+              if ftdcode(24 downto 21) = x"9" then
+                loaded_srca <= rg9;
+              end if;
+              if ftdcode(24 downto 21) = x"A" then
+                loaded_srca <= rgA;
+              end if;
+              if ftdcode(24 downto 21) = x"B" then
+                loaded_srca <= rgB;
+              end if;
+              if ftdcode(24 downto 21) = x"C" then
+                loaded_srca <= rgC;
+              end if;
+              if ftdcode(24 downto 21) = x"D" then
+                loaded_srca <= hp;
+              end if;
+              if ftdcode(24 downto 21) = x"E" then
+                loaded_srca <= sp;
+              end if;
+              if ftdcode(24 downto 21) = x"F" then
+                loaded_srca <= pc;
+              end if;
+              --set source B
+              if ftdcode(20 downto 17) = x"0" then
+                loaded_srcb <= rgzero;
+              end if;
+              if ftdcode(20 downto 17) = x"1" then
+                loaded_srcb <= rg1;
+              end if;
+              if ftdcode(20 downto 17) = x"2" then
+                loaded_srcb <= rg2;
+              end if;
+              if ftdcode(20 downto 17) = x"3" then
+                loaded_srcb <= rg3;
+              end if;
+              if ftdcode(20 downto 17) = x"4" then
+                loaded_srcb <= rg4;
+              end if;
+              if ftdcode(20 downto 17) = x"5" then
+                loaded_srcb <= rg5;
+              end if;
+              if ftdcode(20 downto 17) = x"6" then
+                loaded_srcb <= rg6;
+              end if;
+              if ftdcode(20 downto 17) = x"7" then
+                loaded_srcb <= rg7;
+              end if;
+              if ftdcode(20 downto 17) = x"8" then
+                loaded_srcb <= rg8;
+              end if;
+              if ftdcode(20 downto 17) = x"9" then
+                loaded_srcb <= rg9;
+              end if;
+              if ftdcode(20 downto 17) = x"A" then
+                loaded_srcb <= rgA;
+              end if;
+              if ftdcode(20 downto 17) = x"B" then
+                loaded_srcb <= rgB;
+              end if;
+              if ftdcode(20 downto 17) = x"C" then
+                loaded_srcb <= rgC;
+              end if;
+              if ftdcode(20 downto 17) = x"D" then
+                loaded_srcb <= hp;
+              end if;
+              if ftdcode(20 downto 17) = x"E" then
+                loaded_srcb <= sp;
+              end if;
               if ftdcode(20 downto 17) = x"F" then
                 loaded_srcb <= pc;
               end if;
@@ -756,8 +761,8 @@ begin
             end if;
           end if;
           --MEMORY
-          if ftdcode(31 downto 25) = "1100000" then
-            --load
+          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1100100") then
+            --load, fload
             --calculate address
             --register A
             if ftdcode(20 downto 17) = x"0" then
@@ -816,8 +821,8 @@ begin
             end if;
             opccode_alu <= "0000000";
           end if;
-          if ftdcode(31 downto 25) = "1100010" then
-            --store
+          if (ftdcode(31 downto 25) = "1100010") or (ftdcode(31 downto 25) = "1100110") then
+            --store, fstore
             if ftdcode(20 downto 17) = x"0" then
               reg_in_a <= rgzero;
             end if;
@@ -884,6 +889,42 @@ begin
             end if;
             if ftdcode(24 downto 21) = x"3" then
               debug_otpt <= rg3;
+            end if;
+            if ftdcode(24 downto 21) = x"4" then
+              debug_otpt <= rg4;
+            end if;
+            if ftdcode(24 downto 21) = x"5" then
+              debug_otpt <= rg5;
+            end if;
+            if ftdcode(24 downto 21) = x"6" then
+              debug_otpt <= rg6;
+            end if;
+            if ftdcode(24 downto 21) = x"7" then
+              debug_otpt <= rg7;
+            end if;
+            if ftdcode(24 downto 21) = x"8" then
+              debug_otpt <= rg8;
+            end if;
+            if ftdcode(24 downto 21) = x"9" then
+              debug_otpt <= rg9;
+            end if;
+            if ftdcode(24 downto 21) = x"A" then
+              debug_otpt <= rgA;
+            end if;
+            if ftdcode(24 downto 21) = x"B" then
+              debug_otpt <= rgB;
+            end if;
+            if ftdcode(24 downto 21) = x"C" then
+              debug_otpt <= rgC;
+            end if;
+            if ftdcode(24 downto 21) = x"D" then
+              debug_otpt <= hp;
+            end if;
+            if ftdcode(24 downto 21) = x"E" then
+              debug_otpt <= sp;
+            end if;
+            if ftdcode(24 downto 21) = x"F" then
+              debug_otpt <= pc;
             end if;
             debug_otpt_code <= "000";
             debug_otpt_signal <= '1';
@@ -1017,39 +1058,39 @@ begin
               if ftdcode(24 downto 21) = x"2" then
                 fp2 <= reg_out_fpu;
               end if;
-            if ftdcode(24 downto 21) = x"3" then
-              fp3 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"4" then
-              fp4 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"5" then
-              fp5 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"6" then
-              fp6 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"7" then
-              fp7 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"8" then
-              fp8 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"9" then
-              fp9 <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"A" then
-              fpA <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"B" then
-              fpB <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"C" then
-              fpC <= reg_out_fpu;
-            end if;
-            if ftdcode(24 downto 21) = x"D" then
-              fpD <= reg_out_fpu;
-            end if;
+              if ftdcode(24 downto 21) = x"3" then
+                fp3 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"4" then
+                fp4 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"5" then
+                fp5 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"6" then
+                fp6 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"7" then
+                fp7 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"8" then
+                fp8 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"9" then
+                fp9 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"A" then
+                fpA <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"B" then
+                fpB <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"C" then
+                fpC <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"D" then
+                fpD <= reg_out_fpu;
+              end if;
               if ftdcode(24 downto 21) = x"E" then
                 fpE <= reg_out_fpu;
               end if;
@@ -1243,14 +1284,14 @@ begin
           if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1100100") then
             --load,fload
             sram_go <= '1';
-            sram_addr <= reg_out(19 downto 0);
+            sram_addr <= reg_out(21 downto 2);
             sram_inst_type <= '0';
           end if;
           if ftdcode(31 downto 25) = "1100010" then
             --store(integer)
             sram_go <= '1';
             sram_inst_type <= '1';
-            sram_addr <= reg_out(19 downto 0);
+            sram_addr <= reg_out(21 downto 2);
             if ftdcode(24 downto 21) = x"0" then
               sram_write <= rgzero;
             end if;
@@ -1304,7 +1345,7 @@ begin
             --fstore(float)
             sram_go <= '1';
             sram_inst_type <= '1';
-            sram_addr <= reg_out(19 downto 0);
+            sram_addr <= reg_out(21 downto 2);
             if ftdcode(24 downto 21) = x"0" then
               sram_write <= fpzero;
             end if;
@@ -1357,8 +1398,8 @@ begin
           if ftdcode(31 downto 25) = "1110000" then
             --read
             sram_go <= '1';
-            sram_addr <= read_index;
-            read_index <= read_index + 1;
+            sram_addr <= hp(21 downto 2);
+            hp <= hp + 4;
             sram_inst_type <= '0';
           end if;
         else
