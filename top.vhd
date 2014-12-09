@@ -237,10 +237,12 @@ begin
               u232c_go <= '0';
             end if;
           else
+            u232c_go <= '0';
             sram_go <= '0';
           end if;
         else
-            sram_go <= '0';
+          u232c_go <= '0';
+          sram_go <= '0';
         end if;
 --        if first_state_write_wait = 0 then
           -- write in addr

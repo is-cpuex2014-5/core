@@ -97,7 +97,7 @@ architecture cocore of core is
   signal fpE : std_logic_vector(31 downto 0) := x"00000000";
   signal fpret : std_logic_vector(31 downto 0) := x"00000000";
 -- signals
-  signal state : std_logic_vector(3 downto 0) := x"0";
+  signal state : std_logic_vector(7 downto 0) := x"00";
   signal phase : std_logic_vector(2 downto 0) := "111";
     --phase: active phase (without pipelines)
   signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
@@ -174,7 +174,7 @@ begin
       waitwrite_to_fetch <= waitwrite_from_parent;
       -- state action one
       ldsig <= '1';
-      if state = x"0" then
+      if state = x"00" then
         -- initialize groups
         if phase = "000" then
           --Phase Fetch
@@ -1242,6 +1242,7 @@ begin
             if ftdcode(24 downto 21) = x"F" then
               pc <= sram_read;
             end if;
+            hp <= hp + 4;
           end if;
           --Update PC (Branch case)
           if ftdcode(31 downto 30) = "10" then
@@ -1265,13 +1266,13 @@ begin
         -- the case state != 0
         debug_otpt_signal <= '0';
       end if;
-      if state = x"1" then
+      if state = x"01" then
         sram_go <= '0';
         inputc_fetched <= '0';
         shift_go <= '0';
       end if;
       -- state action two
-      if state = x"8" then
+      if state = x"80" then
         if phase = "000" then
           --Phase Fetch
           if inputc_sram_request_get = '1' then
@@ -1399,19 +1400,18 @@ begin
             --read
             sram_go <= '1';
             sram_addr <= hp(21 downto 2);
-            hp <= hp + 4;
             sram_inst_type <= '0';
           end if;
         else
           sram_go <= '0';
         end if;
       end if;
-      if state = x"9" then
+      if state = x"81" then
         --reflesh
         sram_go <= '0';
         inputc_sram_request_finished <= '0';
       end if;
-      if state = x"E" then
+      if state = x"EE" then
         -- pickup groups
         -- Update cond_new_pc
         if phase = "011" then
@@ -1434,7 +1434,7 @@ begin
       --if state = x"BB" then
       --  debug_otpt <= reg_out;
       --end if;
-      if state = x"F" then
+      if state = x"FF" then
         -- move to next phase
         phase <= phase + 1;
       end if;
