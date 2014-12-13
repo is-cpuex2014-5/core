@@ -127,7 +127,7 @@ architecture cpu_top of top is
   signal sigcount : std_logic_vector(3 downto 0) := x"0";
   signal debug_saved_value : std_logic_vector(31 downto 0);
   signal first_state_sram_input_id : std_logic_vector(19 downto 0) := x"00000";
-  signal first_state_write_wait : std_logic_vector(3 downto 0) := x"0";
+  signal first_state_write_wait : std_logic_vector(7 downto 0) := x"00";
   signal waitwrite_to_core : std_logic_vector(19 downto 0) := x"00000";
   -- wait one clock to wait u232c's busy
   signal debug_waitoneclock : std_logic := '0';
@@ -208,10 +208,139 @@ begin
         waitwrite_to_core <= x"C0C0A";
       end if;
       if top_state = "000" then
+        -- write inst phase
+        if (first_state_write_wait = 0) then
+        -- write in addr
+          if (first_state_sram_input_id<34) then
+            if sram_busy = '0' then
+              sram_go <= '1';
+              sram_inst_type <= '1';
+              first_state_write_wait <= x"FF";
+              sram_addr <= first_state_sram_input_id;
+if first_state_sram_input_id = 0 then
+	sram_write <= x"82000064";
+end if;
+if first_state_sram_input_id = 1 then
+	sram_write <= x"3F800000";
+end if;
+if first_state_sram_input_id = 2 then
+	sram_write <= x"02400002";
+end if;
+if first_state_sram_input_id = 3 then
+	sram_write <= x"8624005C";
+end if;
+if first_state_sram_input_id = 4 then
+	sram_write <= x"06420001";
+end if;
+if first_state_sram_input_id = 5 then
+	sram_write <= x"C43C0000";
+end if;
+if first_state_sram_input_id = 6 then
+	sram_write <= x"00240000";
+end if;
+if first_state_sram_input_id = 7 then
+	sram_write <= x"03DC000C";
+end if;
+if first_state_sram_input_id = 8 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 9 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 10 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 11 then
+	sram_write <= x"07DC000C";
+end if;
+if first_state_sram_input_id = 12 then
+	sram_write <= x"C03C0000";
+end if;
+if first_state_sram_input_id = 13 then
+	sram_write <= x"06220002";
+end if;
+if first_state_sram_input_id = 14 then
+	sram_write <= x"CC3C0008";
+end if;
+if first_state_sram_input_id = 15 then
+	sram_write <= x"03DC0018";
+end if;
+if first_state_sram_input_id = 16 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 17 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 18 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 19 then
+	sram_write <= x"07DC0018";
+end if;
+if first_state_sram_input_id = 20 then
+	sram_write <= x"C85C0008";
+end if;
+if first_state_sram_input_id = 21 then
+	sram_write <= x"40242000";
+end if;
+if first_state_sram_input_id = 22 then
+	sram_write <= x"C1FDFFFC";
+end if;
+if first_state_sram_input_id = 23 then
+	sram_write <= x"C8200004";
+end if;
+if first_state_sram_input_id = 24 then
+	sram_write <= x"C1FDFFFC";
+end if;
+if first_state_sram_input_id = 25 then
+	sram_write <= x"0220000A";
+end if;
+if first_state_sram_input_id = 26 then
+	sram_write <= x"03DC0008";
+end if;
+if first_state_sram_input_id = 27 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 28 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 29 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 30 then
+	sram_write <= x"07DC0008";
+end if;
+if first_state_sram_input_id = 31 then
+	sram_write <= x"54220000";
+end if;
+if first_state_sram_input_id = 32 then
+	sram_write <= x"E2200000";
+end if;
+if first_state_sram_input_id = 33 then
+	sram_write <= x"8001E000";
+end if;
+            else
+              sram_go <= '0';
+            end if;
+          else
+            sram_go <= '0';
+            top_state <= "001";
+          end if;
+        else
+          if (first_state_write_wait = 5) then
+            first_state_sram_input_id <= first_state_sram_input_id + 1;
+          end if;
+          if (first_state_write_wait > 0) then
+            first_state_write_wait <= first_state_write_wait - 1;
+          end if;
+          sram_go <= '0';
+        end if;
+      end if;
+      if top_state = "001" then
         --Input Wait
         if exok_from_read = '1' then
           exok <= '1';
-          top_state <= "001";
+          top_state <= "010";
           --if u232c_busy = '0' then
           --  u232c_data_reg <= x"000000" & debug_otpt_inputc;
           --  u232c_showtype <= "000";
@@ -244,22 +373,8 @@ begin
           u232c_go <= '0';
           sram_go <= '0';
         end if;
---        if first_state_write_wait = 0 then
-          -- write in addr
---          if sram_busy = '0' then
---            sram_go <= '1';
---            first_state_sram_input_id <= first_state_sram_input_id + 1;
---            first_state_write_wait <= x"F";
---            sram_addr <= first_state_sram_input_id;
---          else
---            sram_go <= '0';
---          end if;
---        else
---          first_state_write_wait <= first_state_write_wait - 1;
---          sram_go <= '0';
---        end if;
       end if;
-      if top_state = "001" then
+      if top_state = "010" then
         --Execution
         if u232c_busy = '0' then
           u232c_data_reg <= debug_otpt;

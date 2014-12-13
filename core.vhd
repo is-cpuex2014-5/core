@@ -1007,49 +1007,49 @@ begin
             if ftdcode(31 downto 25) = "0101010" then
               --ftoi
               if ftdcode(24 downto 21) = x"1" then
-                rg1 <= reg_out;
+                rg1 <= reg_out_fpu;
               end if;
               if ftdcode(24 downto 21) = x"2" then
-                rg2 <= reg_out;
+                rg2 <= reg_out_fpu;
               end if;
-            if ftdcode(24 downto 21) = x"3" then
-              rg3 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"4" then
-              rg4 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"5" then
-              rg5 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"6" then
-              rg6 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"7" then
-              rg7 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"8" then
-              rg8 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"9" then
-              rg9 <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"A" then
-              rgA <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"B" then
-              rgB <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"C" then
-              rgC <= reg_out;
-            end if;
-            if ftdcode(24 downto 21) = x"D" then
-              hp <= reg_out;
-            end if;
+              if ftdcode(24 downto 21) = x"3" then
+                rg3 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"4" then
+                rg4 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"5" then
+                rg5 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"6" then
+                rg6 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"7" then
+                rg7 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"8" then
+                rg8 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"9" then
+                rg9 <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"A" then
+                rgA <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"B" then
+                rgB <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"C" then
+                rgC <= reg_out_fpu;
+              end if;
+              if ftdcode(24 downto 21) = x"D" then
+                hp <= reg_out_fpu;
+              end if;
               if ftdcode(24 downto 21) = x"E" then
-                sp <= reg_out;
+                sp <= reg_out_fpu;
               end if;
               if ftdcode(24 downto 21) = x"F" then
-                pc <= reg_out;
+                pc <= reg_out_fpu;
               end if;
             else
               if ftdcode(24 downto 21) = x"1" then
