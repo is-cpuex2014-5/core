@@ -26,31 +26,31 @@ begin
           sram_value(conv_integer(sram_addr(4 downto 0))) <= sram_write;
         else
 if sram_addr = 0 then
-	sram_read <= x"82000064";
+	sram_read <= x"820004E8";
 end if;
 if sram_addr = 1 then
 	sram_read <= x"3F800000";
 end if;
 if sram_addr = 2 then
-	sram_read <= x"02400002";
+	sram_read <= x"3FC00000";
 end if;
 if sram_addr = 3 then
-	sram_read <= x"8624005C";
+	sram_read <= x"43C80000";
 end if;
 if sram_addr = 4 then
-	sram_read <= x"06420001";
+	sram_read <= x"40800000";
 end if;
 if sram_addr = 5 then
-	sram_read <= x"C43C0000";
+	sram_read <= x"E0200000";
 end if;
 if sram_addr = 6 then
-	sram_read <= x"00240000";
+	sram_read <= x"07DC0004";
 end if;
 if sram_addr = 7 then
-	sram_read <= x"03DC000C";
+	sram_read <= x"C1FC0000";
 end if;
 if sram_addr = 8 then
-	sram_read <= x"037E000C";
+	sram_read <= x"E2200000";
 end if;
 if sram_addr > 8 then
           sram_read <= sram_value(conv_integer(sram_addr(4 downto 0)));

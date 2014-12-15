@@ -299,13 +299,13 @@ begin
               if ftdcode(16 downto 13) = x"C" then
                 loaded_srcb <= rgC;
               end if;
-              if ftdcode(20 downto 17) = x"D" then
+              if ftdcode(16 downto 13) = x"D" then
                 loaded_srcb <= hp;
               end if;
-              if ftdcode(20 downto 17) = x"E" then
+              if ftdcode(16 downto 13) = x"E" then
                 loaded_srcb <= sp;
               end if;
-              if ftdcode(20 downto 17) = x"F" then
+              if ftdcode(16 downto 13) = x"F" then
                 loaded_srcb <= pc;
               end if;
             end if;
@@ -1252,7 +1252,7 @@ begin
               -- added nop
             else
               -- The Case when update pc by ALU,load
-              if (ftdcode(31 downto 30) = "00") and (ftdcode(24 downto 21) = x"F") then
+              if ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
               else
                 if (ftdcode(31 downto 25) = "1100000") and (ftdcode(24 downto 21) = x"F") then
                 else

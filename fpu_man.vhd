@@ -183,8 +183,8 @@ begin
       end if;
       -- Operation fsqrt
       if opc_fpu = "0101000" then
-        a_finv <= reg_in_a;
-        reg_out <= ret_finv;
+        a_fsqrt <= reg_in_a;
+        reg_out <= ret_fsqrt;
       end if;
       -- Operation ftoi
       if opc_fpu = "0101010" then
@@ -200,7 +200,7 @@ begin
       if opc_fpu = "0101110" then
         a_fsub <= x"00000000";
         b_fsub <= reg_in_a;
-        reg_out <= ret_fadd;
+        reg_out <= ret_fsub;
       end if;
       -- Operation finv
       if opc_fpu = "0110000" then
