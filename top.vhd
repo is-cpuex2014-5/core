@@ -218,7 +218,7 @@ begin
               first_state_write_wait <= x"FF";
               sram_addr <= first_state_sram_input_id;
 if first_state_sram_input_id = 0 then
-	sram_write <= x"820004E8";
+	sram_write <= x"8200019C";
 end if;
 if first_state_sram_input_id = 1 then
 	sram_write <= x"00000000";
@@ -230,16 +230,16 @@ if first_state_sram_input_id = 3 then
 	sram_write <= x"3FC00000";
 end if;
 if first_state_sram_input_id = 4 then
-	sram_write <= x"43C80000";
+	sram_write <= x"43000000";
 end if;
 if first_state_sram_input_id = 5 then
 	sram_write <= x"40800000";
 end if;
 if first_state_sram_input_id = 6 then
-	sram_write <= x"E0200000";
+	sram_write <= x"40222000";
 end if;
 if first_state_sram_input_id = 7 then
-	sram_write <= x"07DC0004";
+	sram_write <= x"C1FDFFFC";
 end if;
 if first_state_sram_input_id = 8 then
 	sram_write <= x"C1FC0000";

@@ -41,7 +41,7 @@ architecture sram_pyon of sram is
 begin
   SRZCLKMA(0) <= clk;
   SRZCLKMA(1) <= clk;
-  sram_pyon_pyon : process
+  sram_pyon_pyon : process(clk)
   begin
     if rising_edge(clk) then
       if state = 0 then

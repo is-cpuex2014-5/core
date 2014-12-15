@@ -47,7 +47,7 @@ begin
             end if;
           end if;
         else
-          if reg_in_a(31) = '0' then
+          if reg_in_a(31) = '1' then
             cond_out <= '1';
           else
             cond_out <= '0';

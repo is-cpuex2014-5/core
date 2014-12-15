@@ -82,7 +82,7 @@ begin
             --logic
             shift_calc_field <= x"00000000" & reg_in_a & x"00000000";
           end if;
-          if shift_type = "10" then
+          if shift_type = "11" then
             --rotate
             shift_calc_field <= reg_in_a & reg_in_a & reg_in_a;
           end if;
