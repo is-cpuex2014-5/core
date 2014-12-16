@@ -761,8 +761,8 @@ begin
             end if;
           end if;
           --MEMORY
-          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1100100") then
-            --load, fload
+          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000") or (ftdcode(31 downto 25) = "1100100") or (ftdcode(31 downto 25) = "1101100") then
+            --load, loadr, fload, floadr
             --calculate address
             --register A
             if ftdcode(20 downto 17) = x"0" then
@@ -814,15 +814,68 @@ begin
               reg_in_a <= pc;
             end if;
             --register B
-            if ftdcode(16) = '1' then
-              reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+            if ftdcode(28) = '0' then
+              --load, fload
+              if ftdcode(16) = '1' then
+                reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+              else
+                reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+              end if;
             else
-              reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+              --loadr, floadr
+              if ftdcode(16 downto 13) = x"0" then
+                reg_in_b <= rgzero;
+              end if;
+              if ftdcode(16 downto 13) = x"1" then
+                reg_in_b <= rg1;
+              end if;
+              if ftdcode(16 downto 13) = x"2" then
+                reg_in_b <= rg2;
+              end if;
+              if ftdcode(16 downto 13) = x"3" then
+                reg_in_b <= rg3;
+              end if;
+              if ftdcode(16 downto 13) = x"4" then
+                reg_in_b <= rg4;
+              end if;
+              if ftdcode(16 downto 13) = x"5" then
+                reg_in_b <= rg5;
+              end if;
+              if ftdcode(16 downto 13) = x"6" then
+                reg_in_b <= rg6;
+              end if;
+              if ftdcode(16 downto 13) = x"7" then
+                reg_in_b <= rg7;
+              end if;
+              if ftdcode(16 downto 13) = x"8" then
+                reg_in_b <= rg8;
+              end if;
+              if ftdcode(16 downto 13) = x"9" then
+                reg_in_b <= rg9;
+              end if;
+              if ftdcode(16 downto 13) = x"A" then
+                reg_in_b <= rgA;
+              end if;
+              if ftdcode(16 downto 13) = x"B" then
+                reg_in_b <= rgB;
+              end if;
+              if ftdcode(16 downto 13) = x"C" then
+                reg_in_b <= rgC;
+              end if;
+              if ftdcode(16 downto 13) = x"D" then
+                reg_in_b <= hp;
+              end if;
+              if ftdcode(16 downto 13) = x"E" then
+                reg_in_b <= sp;
+              end if;
+              if ftdcode(16 downto 13) = x"F" then
+                reg_in_b <= pc;
+              end if;
             end if;
             opccode_alu <= "0000000";
           end if;
-          if (ftdcode(31 downto 25) = "1100010") or (ftdcode(31 downto 25) = "1100110") then
-            --store, fstore
+          if (ftdcode(31 downto 25) = "1100010") or (ftdcode(31 downto 25) = "1101010") or (ftdcode(31 downto 25) = "1100110") or (ftdcode(31 downto 25) = "1101110") then
+            --store, storer, fstore, fstorer
             if ftdcode(20 downto 17) = x"0" then
               reg_in_a <= rgzero;
             end if;
@@ -872,10 +925,63 @@ begin
               reg_in_a <= pc;
             end if;
             --register B
-            if ftdcode(16) = '1' then
-              reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+            if ftdcode(28) = '0' then
+              --store, fstore
+              if ftdcode(16) = '1' then
+                reg_in_b <= x"FFF" & "111" & ftdcode(16 downto 0);
+              else
+                reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+              end if;
             else
-              reg_in_b <= x"000" & "000" & ftdcode(16 downto 0);
+              --storer, fstorer
+              if ftdcode(16 downto 13) = x"0" then
+                reg_in_b <= rgzero;
+              end if;
+              if ftdcode(16 downto 13) = x"1" then
+                reg_in_b <= rg1;
+              end if;
+              if ftdcode(16 downto 13) = x"2" then
+                reg_in_b <= rg2;
+              end if;
+              if ftdcode(16 downto 13) = x"3" then
+                reg_in_b <= rg3;
+              end if;
+              if ftdcode(16 downto 13) = x"4" then
+                reg_in_b <= rg4;
+              end if;
+              if ftdcode(16 downto 13) = x"5" then
+                reg_in_b <= rg5;
+              end if;
+              if ftdcode(16 downto 13) = x"6" then
+                reg_in_b <= rg6;
+              end if;
+              if ftdcode(16 downto 13) = x"7" then
+                reg_in_b <= rg7;
+              end if;
+              if ftdcode(16 downto 13) = x"8" then
+                reg_in_b <= rg8;
+              end if;
+              if ftdcode(16 downto 13) = x"9" then
+                reg_in_b <= rg9;
+              end if;
+              if ftdcode(16 downto 13) = x"A" then
+                reg_in_b <= rgA;
+              end if;
+              if ftdcode(16 downto 13) = x"B" then
+                reg_in_b <= rgB;
+              end if;
+              if ftdcode(16 downto 13) = x"C" then
+                reg_in_b <= rgC;
+              end if;
+              if ftdcode(16 downto 13) = x"D" then
+                reg_in_b <= hp;
+              end if;
+              if ftdcode(16 downto 13) = x"E" then
+                reg_in_b <= sp;
+              end if;
+              if ftdcode(16 downto 13) = x"F" then
+                reg_in_b <= pc;
+              end if;
             end if;
             opccode_alu <= "0000000";
           end if;
@@ -1099,8 +1205,8 @@ begin
               end if;
             end if;
           end if;
-          if ftdcode(31 downto 25) = "1100000" then
-            --load(integer)
+          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000") then
+            --load,loadr(integer)
             if ftdcode(24 downto 21) = x"1" then
               rg1 <= sram_read;
             end if;
@@ -1147,8 +1253,8 @@ begin
               pc <= sram_read;
             end if;
           end if;
-          if ftdcode(31 downto 25) = "1100100" then
-            --fload(float)
+          if (ftdcode(31 downto 25) = "1100100") or (ftdcode(31 downto 25) = "1101100") then
+            --fload,floadr(float)
             if ftdcode(24 downto 21) = x"1" then
               fp1 <= sram_read;
             end if;
@@ -1251,10 +1357,10 @@ begin
             if ftdcode(31 downto 0) = x"FFFFFFFF" then
               -- added nop
             else
-              -- The Case when update pc by ALU,load
+              -- The Case when update pc by ALU,load,loadr
               if ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
               else
-                if (ftdcode(31 downto 25) = "1100000") and (ftdcode(24 downto 21) = x"F") then
+                if ((ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000")) and (ftdcode(24 downto 21) = x"F") then
                 else
                   pc <= pc + 4;
                 end if;
@@ -1275,6 +1381,7 @@ begin
       if state = x"80" then
         if phase = "000" then
           --Phase Fetch
+          --skipped
           if inputc_sram_request_get = '1' then
             inputc_sram_getvalue <= sram_read;
             inputc_sram_request_finished <= '1';
@@ -1282,14 +1389,14 @@ begin
         end if;
         if phase = "011" then
           --Phase EXEC
-          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1100100") then
-            --load,fload
+          if (ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000") or (ftdcode(31 downto 25) = "1100100") or (ftdcode(31 downto 25) = "1101100") then
+            --load,loadr,fload,floadr
             sram_go <= '1';
             sram_addr <= reg_out(21 downto 2);
             sram_inst_type <= '0';
           end if;
-          if ftdcode(31 downto 25) = "1100010" then
-            --store(integer)
+          if (ftdcode(31 downto 25) = "1100010") or (ftdcode(31 downto 25) = "1101010") then
+            --store,storer(integer)
             sram_go <= '1';
             sram_inst_type <= '1';
             sram_addr <= reg_out(21 downto 2);
@@ -1342,8 +1449,8 @@ begin
               sram_write <= pc;
             end if;
           end if;
-          if ftdcode(31 downto 25) = "1100110" then
-            --fstore(float)
+          if (ftdcode(31 downto 25) = "1100110") or (ftdcode(31 downto 25) = "1101110") then
+            --fstore,fstorer(float)
             sram_go <= '1';
             sram_inst_type <= '1';
             sram_addr <= reg_out(21 downto 2);
@@ -1438,7 +1545,61 @@ begin
         -- move to next phase
         phase <= phase + 1;
       end if;
-      state <= state + 1;
+      --state update
+      if phase = "000" then
+        -- Fetch
+        if state = x"04" then
+          --skip
+          state <= x"FF";
+        else
+          state <= state + 1;
+        end if;
+      end if;
+      if phase = "001" then
+        -- Decode
+        if state = x"04" then
+          --skip
+          state <= x"FF";
+        else
+          state <= state + 1;
+        end if;
+      end if;
+      if phase = "010" then
+        -- Load
+        if state = x"04" then
+          --skip
+          state <= x"FF";
+        else
+          state <= state + 1;
+        end if;
+      end if;
+      if phase = "011" then
+        -- Exec
+        if state = x"20" then
+          --skip
+          state <= x"80";
+        else
+          if state = x"A0" then
+            --skip
+            state <= x"EE";
+          else
+            state <= state + 1;
+          end if;
+        end if;
+      end if;
+      if phase = "100" then
+        if state = x"20" then
+          --skip
+          state <= x"FF";
+          phase <= "111";
+        else
+          state <= state + 1;
+        end if;
+      end if;
+      if phase = "111" then
+        --dummy
+        state <= state + 1;
+      end if;
       ostate <= "00000000" + state + 1;
     end if;
   end process;

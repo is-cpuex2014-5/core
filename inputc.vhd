@@ -29,15 +29,25 @@ architecture blkbx of inputc is
   signal readone : std_logic_vector(2 downto 0) := "000";
   signal base_ln : std_logic_vector(7 downto 0) := x"30";
   signal next_write_addr : std_logic_vector(19 downto 0) := x"55555";
+  signal input_started : std_logic := '0';
+  signal input_nop_len : std_logic_vector(31 downto 0) := x"00000000";
 begin
   sttmachine: process(clk)
   begin
     if rising_edge(clk) then
       if state = 10 then
+        if input_started = '1' then
+          if input_nop_len = x"FFFFFFFF" then
+            execute_ok <= '1';
+          end if;
+          input_nop_len <= input_nop_len + 1;
+        end if;
         if rx = '0' then
-          countdown <= x"1ADA";
+          countdown <= x"1C05";
           state <= x"0";
           readbuf <= x"00";
+          input_started <= '1';
+          input_nop_len <= x"00000000";
         end if;
       end if;
       if (state > 0) and (state < 9) then
@@ -66,20 +76,20 @@ begin
         if countdown = 0 then
           -- move to next state
           state <= state + 1;
-          countdown <= x"1ADA";
+          countdown <= x"1C05";
           readcount <= x"0000";
           readzero <= "000";
           readone <= "000";
           write_ok <= '0';
         else
-          if (state = 9) and (countdown = 150) then
+          if (state = 9) and (countdown = 6000) then
             --skip and end of read char
             countdown <= x"0000";
             state <= state + 1;
             --execute_ok <= '1';
             if readbuf = x"58" then
               execute_ok <= '1';
-              write_ok <= '0';
+            --  write_ok <= '0';
             else
               write_value <= x"00000000" + readbuf;
               write_addr <= next_write_addr;

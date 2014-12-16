@@ -34,7 +34,7 @@ begin
         busy <= '1';
       end if;
       if state = x"9" then
-        if countdown = 1 then
+        if countdown = 100 then
           state <= x"A";
           countdown <= wtime;
           send_buf <= "1" & send_buf(8 downto 1);

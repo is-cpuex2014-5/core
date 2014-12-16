@@ -49,6 +49,8 @@ architecture testbench of test is
   signal debug_otpt_code : std_logic_vector(2 downto 0);
   signal debug_otpt_signal : std_logic;
   signal waitwrite_always_zero : std_logic_vector(19 downto 0) := x"00000";
+  type BIN is file of character;
+  file FILEOUT : BIN open WRITE_MODE is "out.txt";
 begin
   core_send: core Port map (
       clk => simclk,
@@ -89,6 +91,9 @@ begin
         sram_read_c <= sram_read_x;
         sram_go_x <= '0';
       end if;
+    end if;
+    if debug_otpt_signal = '1' then
+      write(FILEOUT,character'val(conv_integer(debug_otpt(7 downto 0))));
     end if;
     wait for 50 ns;
     simclk <= '1';

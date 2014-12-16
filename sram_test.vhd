@@ -15,7 +15,7 @@ entity sramt is
 end sramt;
 
 architecture sram_pyon of sramt is
-  type sram_array is array(31 downto 0) of std_logic_vector(31 downto 0);
+  type sram_array is array(1048575 downto 0) of std_logic_vector(31 downto 0);
   signal sram_value : sram_array := (others => x"00000000");
 begin
   sram_pyon_pyon : process(clk)
@@ -23,16 +23,16 @@ begin
     if rising_edge(clk) then
       if sram_go = '1' then
         if sram_inst_type = '1' then
-          sram_value(conv_integer(sram_addr(4 downto 0))) <= sram_write;
+          sram_value(conv_integer(sram_addr(19 downto 0))) <= sram_write;
         else
 if sram_addr = 0 then
-	sram_read <= x"8200019C";
+	sram_read <= x"82000064";
 end if;
 if sram_addr = 1 then
-	sram_read <= x"00000000";
+	sram_read <= x"3F800000";
 end if;
 if sram_addr = 2 then
-	sram_read <= x"3F800000";
+	sram_read <= x"02400002";
 end if;
 if sram_addr = 3 then
 	sram_read <= x"3FC00000";
@@ -53,7 +53,7 @@ if sram_addr = 8 then
 	sram_read <= x"82200098";
 end if;
 if sram_addr > 8 then
-          sram_read <= sram_value(conv_integer(sram_addr(4 downto 0)));
+          sram_read <= sram_value(conv_integer(sram_addr(19 downto 0)));
 end if;
         end if;
       end if;
