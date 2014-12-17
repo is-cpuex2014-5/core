@@ -1,0 +1,96 @@
+if first_state_sram_input_id = 0 then
+	sram_write <= x"82000064";
+end if;
+if first_state_sram_input_id = 1 then
+	sram_write <= x"3F800000";
+end if;
+if first_state_sram_input_id = 2 then
+	sram_write <= x"02400002";
+end if;
+if first_state_sram_input_id = 3 then
+	sram_write <= x"8624005C";
+end if;
+if first_state_sram_input_id = 4 then
+	sram_write <= x"06420001";
+end if;
+if first_state_sram_input_id = 5 then
+	sram_write <= x"C43C0000";
+end if;
+if first_state_sram_input_id = 6 then
+	sram_write <= x"00240000";
+end if;
+if first_state_sram_input_id = 7 then
+	sram_write <= x"03DC000C";
+end if;
+if first_state_sram_input_id = 8 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 9 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 10 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 11 then
+	sram_write <= x"07DC000C";
+end if;
+if first_state_sram_input_id = 12 then
+	sram_write <= x"C03C0000";
+end if;
+if first_state_sram_input_id = 13 then
+	sram_write <= x"06220002";
+end if;
+if first_state_sram_input_id = 14 then
+	sram_write <= x"CC3C0008";
+end if;
+if first_state_sram_input_id = 15 then
+	sram_write <= x"03DC0018";
+end if;
+if first_state_sram_input_id = 16 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 17 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 18 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 19 then
+	sram_write <= x"07DC0018";
+end if;
+if first_state_sram_input_id = 20 then
+	sram_write <= x"C85C0008";
+end if;
+if first_state_sram_input_id = 21 then
+	sram_write <= x"40242000";
+end if;
+if first_state_sram_input_id = 22 then
+	sram_write <= x"C1FDFFFC";
+end if;
+if first_state_sram_input_id = 23 then
+	sram_write <= x"C8200004";
+end if;
+if first_state_sram_input_id = 24 then
+	sram_write <= x"C1FDFFFC";
+end if;
+if first_state_sram_input_id = 25 then
+	sram_write <= x"0220000A";
+end if;
+if first_state_sram_input_id = 26 then
+	sram_write <= x"03DC0008";
+end if;
+if first_state_sram_input_id = 27 then
+	sram_write <= x"037E000C";
+end if;
+if first_state_sram_input_id = 28 then
+	sram_write <= x"C57DFFFC";
+end if;
+if first_state_sram_input_id = 29 then
+	sram_write <= x"82000008";
+end if;
+if first_state_sram_input_id = 30 then
+	sram_write <= x"07DC0008";
+end if;
+if first_state_sram_input_id = 31 then
+	sram_write <= x"8001E000";
+end if;

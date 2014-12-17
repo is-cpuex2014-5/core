@@ -1,0 +1,96 @@
+# //  ModelSim SE 10.0c Jul 21 2011 Linux 3.5.0-24-generic
+# //
+# //  Copyright 1991-2011 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  THIS WORK CONTAINS TRADE SECRET AND PROPRIETARY INFORMATION
+# //  WHICH IS THE PROPERTY OF MENTOR GRAPHICS CORPORATION OR ITS
+# //  LICENSORS AND IS SUBJECT TO LICENSE TERMS.
+# //
+# Loading project rice
+#  
+# Compile of core.vhd failed with 4 errors.
+# Compile of test.vhd was successful.
+# Compile of alu.vhd was successful.
+# Compile of compr.vhd was successful.
+# Compile of fetch_test.vhd was successful.
+# 5 compiles, 1 failed with 4 errors. 
+# Compile of core.vhd failed with 4 errors.
+# Compile of test.vhd was successful.
+# Compile of alu.vhd was successful.
+# Compile of compr.vhd was successful.
+# Compile of fetch_test.vhd was successful.
+# Compile of fpu_man.vhd failed with 1 errors.
+# 6 compiles, 2 failed with 5 errors. 
+# Compile of fpu_man.vhd was successful.
+# Compile of core.vhd failed with 4 errors.
+# Compile of test.vhd was successful.
+# Compile of alu.vhd was successful.
+# Compile of compr.vhd was successful.
+# Compile of fetch_test.vhd was successful.
+# Compile of fpu_man.vhd was successful.
+# 6 compiles, 1 failed with 4 errors. 
+# Compile of core.vhd failed with 4 errors.
+# Compile of test.vhd was successful.
+# Compile of alu.vhd was successful.
+# Compile of compr.vhd was successful.
+# Compile of fetch_test.vhd was successful.
+# Compile of fpu_man.vhd was successful.
+# 6 compiles, 1 failed with 4 errors. 
+# Compile of core.vhd was successful.
+# Compile of test.vhd was successful.
+# Compile of alu.vhd was successful.
+# Compile of compr.vhd was successful.
+# Compile of fetch_test.vhd was successful.
+# Compile of fpu_man.vhd was successful.
+# 6 compiles, 0 failed with no errors. 
+vsim core.test
+# vsim core.test 
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.std_logic_arith(body)
+# Loading ieee.std_logic_unsigned(body)
+# Loading work.test(testbench)#1
+# Loading work.core(cocore)#1
+# ** Warning: (vsim-8683) Uninitialized out port /test/core_send/with_fetch/inst_sram_addr(19 downto 0) has no driver.
+# This port will contribute value (UUUUUUUUUUUUUUUUUUUU) to the signal network.
+add wave -r sim:/test/*
+run 100ms -all
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_fpu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_fpu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_alu
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_compr
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_compr
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_compr
+# ** Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+#    Time: 50 ns  Iteration: 1  Instance: /test/core_send/with_compr

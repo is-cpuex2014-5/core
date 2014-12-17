@@ -1,0 +1,86 @@
+#include <cstdio>
+
+char vl[99]="011101010100010101010010010111010111010101000101010100100101110101110101010001010101001001011101";
+char sss[99]="0123456789ABCDEF";
+void printdlx(int st,int ed) {
+	int sum=0;
+	int kt=0;
+	while(st<ed) {
+		sum*=2;
+		if(vl[st]=='1') sum++;
+		st++;
+		kt++;
+		if(kt==4) {
+			kt=0;
+			printf("%c",sss[sum]);
+			sum=0;
+		}
+	}
+}
+int main() {
+	int pc=0;
+	for(int i=0;i<32;i++) {
+		printf("if pc = %d then\n\tinst <= x\"0221",pc);
+		printdlx(32,48);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0222",pc);
+		printdlx(48,64);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0241",pc);
+		printdlx(32-i,48-i);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0244",pc);
+		printdlx(48-i,64-i);
+		printf("\";\nend if;\n");
+		pc+=4;
+		if(i>15) {
+			printf("if pc = %d then\n\tinst <= x\"82621%c",pc,sss[i-16]);
+			printf("E0\";\nend if;\n");
+		} else {
+			printf("if pc = %d then\n\tinst <= x\"82620%c",pc,sss[i]);
+			printf("E0\";\nend if;\n");
+		}
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"80640008\";\nend if;\n",pc);
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"8001E000\";\nend if;\n",pc);
+		pc+=4;
+	}
+	for(int i=0;i<32;i++) {
+		printf("if pc = %d then\n\tinst <= x\"0221",pc);
+		printdlx(32,48);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0222",pc);
+		printdlx(48,64);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0241",pc);
+		printdlx(32+i,48+i);
+		printf("\";\nend if;\n");
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"0244",pc);
+		printdlx(48+i,64+i);
+		printf("\";\nend if;\n");
+		pc+=4;
+		if(i>15) {
+			printf("if pc = %d then\n\tinst <= x\"22621%c",pc,sss[i-16]);
+			printf("60\";\nend if;\n");
+		} else {
+			printf("if pc = %d then\n\tinst <= x\"22620%c",pc,sss[i]);
+			printf("60\";\nend if;\n");
+		}
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"80640008\";\nend if;\n",pc);
+		pc+=4;
+		printf("if pc = %d then\n\tinst <= x\"8001E000\";\nend if;\n",pc);
+		pc+=4;
+	}
+	printf("if pc = %d then\n\tinst <= x\"8001E000\";\nend if;\n",pc);
+	pc+=4;
+	return 0;
+}
+

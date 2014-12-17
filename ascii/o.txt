@@ -1,0 +1,147 @@
+if pc = 0 then
+	inst <= x"82000090";
+end if;
+if pc = 4 then
+	inst <= x"86200084";
+end if;
+if pc = 8 then
+	inst <= x"06420001";
+end if;
+if pc = 12 then
+	inst <= x"C43C0000";
+end if;
+if pc = 16 then
+	inst <= x"C17DFFFC";
+end if;
+if pc = 20 then
+	inst <= x"00240000";
+end if;
+if pc = 24 then
+	inst <= x"C57C0004";
+end if;
+if pc = 28 then
+	inst <= x"03DC0008";
+end if;
+if pc = 32 then
+	inst <= x"037E0010";
+end if;
+if pc = 36 then
+	inst <= x"C57C0000";
+end if;
+if pc = 40 then
+	inst <= x"03DC0004";
+end if;
+if pc = 44 then
+	inst <= x"82000004";
+end if;
+if pc = 48 then
+	inst <= x"07DC0008";
+end if;
+if pc = 52 then
+	inst <= x"C17C0004";
+end if;
+if pc = 56 then
+	inst <= x"C57DFFFC";
+end if;
+if pc = 60 then
+	inst <= x"C05C0000";
+end if;
+if pc = 64 then
+	inst <= x"06440002";
+end if;
+if pc = 68 then
+	inst <= x"C43C0004";
+end if;
+if pc = 72 then
+	inst <= x"C17DFFFC";
+end if;
+if pc = 76 then
+	inst <= x"00240000";
+end if;
+if pc = 80 then
+	inst <= x"C57C000C";
+end if;
+if pc = 84 then
+	inst <= x"03DC0010";
+end if;
+if pc = 88 then
+	inst <= x"037E0010";
+end if;
+if pc = 92 then
+	inst <= x"C57C0000";
+end if;
+if pc = 96 then
+	inst <= x"03DC0004";
+end if;
+if pc = 100 then
+	inst <= x"82000004";
+end if;
+if pc = 104 then
+	inst <= x"07DC0010";
+end if;
+if pc = 108 then
+	inst <= x"C17C000C";
+end if;
+if pc = 112 then
+	inst <= x"C57DFFFC";
+end if;
+if pc = 116 then
+	inst <= x"C05C0004";
+end if;
+if pc = 120 then
+	inst <= x"00242000";
+end if;
+if pc = 124 then
+	inst <= x"07DC0004";
+end if;
+if pc = 128 then
+	inst <= x"C1FC0000";
+end if;
+if pc = 132 then
+	inst <= x"02200001";
+end if;
+if pc = 136 then
+	inst <= x"07DC0004";
+end if;
+if pc = 140 then
+	inst <= x"C1FC0000";
+end if;
+if pc = 144 then
+	inst <= x"02200008";
+end if;
+if pc = 148 then
+	inst <= x"C17DFFFC";
+end if;
+if pc = 152 then
+	inst <= x"C57C0004";
+end if;
+if pc = 156 then
+	inst <= x"03DC0008";
+end if;
+if pc = 160 then
+	inst <= x"037E0010";
+end if;
+if pc = 164 then
+	inst <= x"C57C0000";
+end if;
+if pc = 168 then
+	inst <= x"03DC0004";
+end if;
+if pc = 172 then
+	inst <= x"82000004";
+end if;
+if pc = 176 then
+	inst <= x"07DC0008";
+end if;
+if pc = 180 then
+	inst <= x"C17C0004";
+end if;
+if pc = 184 then
+	inst <= x"C57DFFFC";
+end if;
+if pc = 188 then
+	inst <= x"8001E000";
+end if;
+if pc > 188 then
+	inst <= x"FFFFFFFF";
+end if;
