@@ -85,6 +85,21 @@ architecture cocore of core is
   signal read_index : std_logic_vector(19 downto 0) := x"00000";
   signal waitwriting : std_logic := '0';
 begin
+<<<<<<< HEAD
+=======
+  with_fetch: fetch Port map (
+      clk => clk,
+      pc => rg (15),
+      load_signal => ldsig,
+      inst => inst_from_fetch,
+      inst_sram_request => inputc_sram_request,
+      inst_sram_getvalue => inputc_sram_getvalue,
+      inst_sram_addr => inputc_sram_addr,
+      inst_fetched => inputc_fetched,
+      inst_sram_request_finished => inputc_sram_request_finished,
+      waitwrite => waitwrite_to_fetch
+    );
+>>>>>>> 565732edc45e1a6c8cce359bb34b9a4dcfc4cf6e
   with_alu: alu Port map (
       clk => clk,
       opc_alu => opccode_alu,
