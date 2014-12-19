@@ -26,7 +26,7 @@ begin
       if state < 9 then
         if countdown = 1 then
           state <= state + 1;
-          countdown <= wtime;
+          countdown <= x"1AD0";
           send_buf <= "1" & send_buf(8 downto 1);
         else
           countdown <= countdown - 1;
@@ -36,7 +36,7 @@ begin
       if state = x"9" then
         if countdown = 100 then
           state <= x"A";
-          countdown <= wtime;
+          countdown <= x"1AD0";
           send_buf <= "1" & send_buf(8 downto 1);
           busy <= '0';
         else

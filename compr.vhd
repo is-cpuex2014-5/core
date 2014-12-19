@@ -40,7 +40,7 @@ begin
               cond_out <= '0';
             end if;
           else
-            if reg_in_a > reg_in_b then
+            if reg_in_a < reg_in_b then
               cond_out <= '1';
             else
               cond_out <= '0';
