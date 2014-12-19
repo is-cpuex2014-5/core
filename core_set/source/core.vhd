@@ -419,7 +419,7 @@ begin
         sram_go <= '0';
         read_signal <= '0';
       end if;
-      if state = x"EE" then
+      if state = x"FE" then
         -- pickup groups
         -- Update cond_new_pc
         if phase = "011" then
@@ -460,7 +460,7 @@ begin
       end if;
       if phase = "001" then
         -- Decode
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -469,7 +469,7 @@ begin
       end if;
       if phase = "010" then
         -- Load
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -478,20 +478,26 @@ begin
       end if;
       if phase = "011" then
         -- Exec
-        if state = x"20" then
+        if state = x"10" then
           --skip
           state <= x"80";
         else
-          if state = x"A0" then
-            --skip
-            state <= x"EE";
+          if (state = x"81") and (ftdcode(31 downto 30) < 3) then
+            -- without SRAM
+            state <= x"FE";
           else
-            state <= state + 1;
+            -- without SRAM
+            if state = x"90" then
+              --skip
+              state <= x"FF";
+            else
+              state <= state + 1;
+            end if;
           end if;
         end if;
       end if;
       if phase = "100" then
-        if state = x"20" then
+        if state = x"01" then
           --skip
           state <= x"FF";
           phase <= "111";
