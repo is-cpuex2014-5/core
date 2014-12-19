@@ -85,21 +85,6 @@ architecture cocore of core is
   signal read_index : std_logic_vector(19 downto 0) := x"00000";
   signal waitwriting : std_logic := '0';
 begin
-<<<<<<< HEAD
-=======
-  with_fetch: fetch Port map (
-      clk => clk,
-      pc => rg (15),
-      load_signal => ldsig,
-      inst => inst_from_fetch,
-      inst_sram_request => inputc_sram_request,
-      inst_sram_getvalue => inputc_sram_getvalue,
-      inst_sram_addr => inputc_sram_addr,
-      inst_fetched => inputc_fetched,
-      inst_sram_request_finished => inputc_sram_request_finished,
-      waitwrite => waitwrite_to_fetch
-    );
->>>>>>> 565732edc45e1a6c8cce359bb34b9a4dcfc4cf6e
   with_alu: alu Port map (
       clk => clk,
       opc_alu => opccode_alu,
@@ -434,7 +419,7 @@ begin
         sram_go <= '0';
         read_signal <= '0';
       end if;
-      if state = x"EE" then
+      if state = x"FE" then
         -- pickup groups
         -- Update cond_new_pc
         if phase = "011" then
@@ -475,7 +460,7 @@ begin
       end if;
       if phase = "001" then
         -- Decode
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -484,7 +469,7 @@ begin
       end if;
       if phase = "010" then
         -- Load
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -493,20 +478,26 @@ begin
       end if;
       if phase = "011" then
         -- Exec
-        if state = x"20" then
+        if state = x"10" then
           --skip
           state <= x"80";
         else
-          if state = x"A0" then
-            --skip
-            state <= x"EE";
+          if (state = x"81") and (ftdcode(31 downto 30) < 3) then
+            -- without SRAM
+            state <= x"FE";
           else
-            state <= state + 1;
+            -- without SRAM
+            if state = x"90" then
+              --skip
+              state <= x"FF";
+            else
+              state <= state + 1;
+            end if;
           end if;
         end if;
       end if;
       if phase = "100" then
-        if state = x"20" then
+        if state = x"01" then
           --skip
           state <= x"FF";
           phase <= "111";
