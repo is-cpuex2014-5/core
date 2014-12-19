@@ -56,12 +56,24 @@ architecture fpu_man_main of fpu_man is
     Q : out std_logic_vector(31 downto 0)
   );
   end component;
+  component fneg is
+    port (
+      A   : in  std_logic_vector (31 downto 0);
+      CLK : in  std_logic;
+      Q   : out std_logic_vector (31 downto 0));
+  end component fneg;
   component finv Port (
     A : in std_logic_vector(31 downto 0);
     CLK : in std_logic;
     Q : out std_logic_vector(31 downto 0)
   );
   end component;
+  component fabs is
+    port (
+      A   : in  std_logic_vector (31 downto 0);
+      CLK : in  std_logic;
+      Q   : out std_logic_vector (31 downto 0));
+  end component fabs;
   component feq Port (
     A : in std_logic_vector(31 downto 0);
     B : in std_logic_vector(31 downto 0);
@@ -93,8 +105,12 @@ architecture fpu_man_main of fpu_man is
   signal ret_floor : std_logic_vector(31 downto 0);
   signal a_itof : std_logic_vector(31 downto 0);
   signal ret_itof : std_logic_vector(31 downto 0);
+  signal a_fneg : std_logic_vector (31 downto 0);
+  signal ret_fneg : std_logic_vector (31 downto 0);
   signal a_finv : std_logic_vector(31 downto 0);
   signal ret_finv : std_logic_vector(31 downto 0);
+  signal a_fabs : std_logic_vector (31 downto 0);
+  signal ret_fabs : std_logic_vector (31 downto 0);
   signal a_bfeq : std_logic_vector(31 downto 0);
   signal b_bfeq : std_logic_vector(31 downto 0);
   signal ret_bfeq : std_logic;
@@ -135,11 +151,19 @@ begin
     CLK => clk,
     Q => ret_itof
   );
+  with_fneg: fneg Port map (
+    A   => a_fneg,
+    CLK => clk,
+    Q   => ret_fneg);
   with_finv : finv Port map(
     A => a_finv,
     CLK => clk,
     Q => ret_finv
   );
+  with_fabs : fabs Port map (
+    A   => a_fabs,
+    CLK => clk,
+    Q   => ret_fabs);
   with_bfeq : feq Port map(
     A => a_bfeq,
     B => b_bfeq,
@@ -198,14 +222,17 @@ begin
       end if;
       -- Operation fneg
       if opc_fpu = "0101110" then
-        a_fsub <= x"00000000";
-        b_fsub <= reg_in_a;
-        reg_out <= ret_fsub;
+        a_fneg <= reg_in_a;
+        reg_out <= ret_fneg;
       end if;
       -- Operation finv
       if opc_fpu = "0110000" then
         a_finv <= reg_in_a;
         reg_out <= ret_finv;
+      -- Operation fabs
+      elsif opc_fpu = "0111000" then
+        a_fabs <= reg_in_a;
+        reg_out <= ret_fabs;
       end if;
       -- Operation bfeq,bfeqi
       if opc_fpu(6 downto 1) = "100010" then
