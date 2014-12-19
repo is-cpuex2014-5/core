@@ -43,7 +43,7 @@ architecture testbench of test is
   signal sram_write_c : std_logic_vector(31 downto 0);
   signal sram_inst_type_x : std_logic;
   signal sram_go_x : std_logic;
-  signal sram_wait : std_logic_vector(1 downto 0);
+  signal sram_wait : std_logic_vector(1 downto 0) := "00";
   signal sram_addr_x : std_logic_vector(19 downto 0);
   signal sram_read_x : std_logic_vector(31 downto 0);
   signal sram_write_x : std_logic_vector(31 downto 0);
@@ -58,13 +58,11 @@ architecture testbench of test is
   -- 01 : read sld
   -- 11 : run core
   signal state : std_logic_vector (1 downto 0) := (others => '0'); 
-  file OPIN : text;
-  file SLDIN : text;
+  file OPIN : text open READ_MODE is "op_in.txt";
+  file SLDIN : text open READ_MODE is "sld_in.txt";
   signal operation_addr : std_logic_vector (19 downto 0) := (others => '0');
   signal sld_addr : std_logic_vector (19 downto 0) := x"55555";
 begin
-  file_open(OPIN, "op_in.txt",  READ_MODE);
-  file_open(SLDIN, "SLD_in.txt",  READ_MODE);
   
   with state select
     exok <=
@@ -108,7 +106,7 @@ begin
           hread (l,operation);
           -- write sram
           sram_go_x <= '1';
-          sram_inst_type_x <= sram_inst_type_c;
+          sram_inst_type_x <= '1';
           sram_addr_x <= operation_addr;
           sram_write_x <= operation;
           sram_wait <= "11";
@@ -119,6 +117,7 @@ begin
         end if;
       else
         -- if eof start reading sld
+        write (output,"finish reading operation");        
         state <= "01";
       end if;
     -- read sld
@@ -130,7 +129,7 @@ begin
           hread (l,sld);
           -- write sram
           sram_go_x <= '1';
-          sram_inst_type_x <= sram_inst_type_c;
+          sram_inst_type_x <= '1';
           sram_addr_x <= sld_addr;
           sram_write_x <= x"000000" & sld;
           sram_wait <= "11";
@@ -140,8 +139,9 @@ begin
           sram_wait <= sram_wait - 1;
         end if;
       else
+        write (output,"finish reading sld");        
         -- if eof start reading sld
-        state <= "01";
+        state <= "11";
       end if;
     -- core runs
     else
@@ -160,7 +160,8 @@ begin
           sram_go_x <= '0';
         end if;
       end if;
-      if debug_otpt_signal = '1' then
+      if debug_otpt_signal = '1' then        
+        write (output,"finish reading sld");
         write(FILEOUT,character'val(conv_integer(debug_otpt(7 downto 0))));
       end if;
     end if;
