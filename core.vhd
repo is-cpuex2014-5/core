@@ -354,20 +354,14 @@ begin
           if ftdcode(31 downto 30) = "10" then
             --pc <= cond_new_pc;
             rg (15) <= cond_new_pc;
+          elsif ftdcode(31 downto 0) = x"FFFFFFFF" then
+          -- added nop
+          elsif ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
+          -- The Case when update pc by ALU,load,loadr
+          elsif ((ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000")) and (ftdcode(24 downto 21) = x"F") then
           else
-            if ftdcode(31 downto 0) = x"FFFFFFFF" then
-              -- added nop
-            else
-              -- The Case when update pc by ALU,load,loadr
-              if ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
-              else
-                if ((ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000")) and (ftdcode(24 downto 21) = x"F") then
-                else
-                  --pc <= pc + 4;   
-                  rg (15) <= rg (15) + 4;
-                end if;
-              end if;
-            end if;
+            --pc <= pc + 4;   
+            rg (15) <= rg (15) + 4;
           end if;
         end if;
       else
@@ -431,13 +425,11 @@ begin
               -- cond_new_pc <= pc + 4;
               cond_new_pc <= rg (15) + 4;
             end if;            
+          elsif cond_out_compr = '1' then
+            cond_new_pc <= reg_out;
           else
-            if cond_out_compr = '1' then
-              cond_new_pc <= reg_out;
-            else
-              -- cond_new_pc <= pc + 4;
-              cond_new_pc <= rg (15) + 4;
-            end if;
+            -- cond_new_pc <= pc + 4;
+            cond_new_pc <= rg (15) + 4;
           end if;
         end if;
       end if;
@@ -481,22 +473,19 @@ begin
         if state = x"10" then
           --skip
           state <= x"80";
+        elsif (state = x"81") and (ftdcode(31 downto 30) < 3) then
+          -- without SRAM
+          state <= x"FE";
+        -- without SRAM
+        elsif state = x"90" then
+          --skip
+          state <= x"FF";
         else
-          if (state = x"81") and (ftdcode(31 downto 30) < 3) then
-            -- without SRAM
-            state <= x"FE";
-          else
-            -- without SRAM
-            if state = x"90" then
-              --skip
-              state <= x"FF";
-            else
-              state <= state + 1;
-            end if;
-          end if;
+          state <= state + 1;
         end if;
       end if;
       if phase = "100" then
+        -- Store
         if state = x"01" then
           --skip
           state <= x"FF";

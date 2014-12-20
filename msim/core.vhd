@@ -84,8 +84,9 @@ architecture cocore of core is
   signal loaded_srca : std_logic_vector(31 downto 0);
   signal loaded_srcb : std_logic_vector(31 downto 0);
   signal loaded_newpc : std_logic_vector(31 downto 0);
-  signal read_index : std_logic_vector(19 downto 0) := x"00000";
+  signal read_index : std_logic_vector(19 downto 0) := x"55555";
   signal waitwriting : std_logic := '0';
+  file DEBUG_OUT : text open WRITE_MODE is "debug_out.txt";
 begin
   with_alu: alu Port map (
       clk => clk,
@@ -356,6 +357,7 @@ begin
               rg (conv_integer(ftdcode(24 downto 21))) <= sram_read;
             end if;
             -- hp <= hp + 4
+            read_index <= read_index + 1;
 --            rg (13) <= rg (13) + 4;
           end if;
           --Update PC (Branch case)
@@ -410,13 +412,15 @@ begin
             sram_addr <= reg_out(21 downto 2);
             sram_write <= fp (conv_integer (ftdcode(24 downto 21)));
           end if;
-          if ftdcode(31 downto 25) = "1110000" then
+          if ftdcode(31 downto 25) = "1110000" then          
             --read
---            sram_go <= '1';
-              read_signal <= '1';
+            write (output,"read");
+            sram_go <= '1';
+            read_signal <= '1';
             -- sram_addr <= hp(21 downto 2);
+            sram_addr <= read_index;
 --            sram_addr <= rg (13) (21 downto 2);
---            sram_inst_type <= '0';
+            sram_inst_type <= '0';
           end if;
         else
           sram_go <= '0';
@@ -595,7 +599,8 @@ begin
             debug_out_op := "read   ";
           when "1110001" =>
             debug_out_op := "write  ";
-          when others => null;
+          when others => 
+            debug_out_op := "none   ";
         end case;
         write (debug_out_line,debug_out_op);
         write (debug_out_line,string'(" "));
@@ -603,14 +608,18 @@ begin
         write (debug_out_line,string'(" "));
         hwrite (debug_out_line,ftdcode);
         write (debug_out_line,string'(" "));
-        if ftdcode (31 downto 30) /= "01" or ftdcode (31 downto 25) = "0101010" then
+        if (ftdcode (31 downto 28)= "1100" and ftdcode (26 downto 25) = "00" ) or ftdcode (31 downto 25) = "1110000"then
+          -- load,fload,read
+          write (debug_out_line,sram_read);
+        elsif ftdcode (31 downto 30) /= "01" or ftdcode (31 downto 25) = "0101010" then
           write (debug_out_line,reg_out);
         else
           write (debug_out_line,reg_out_fpu);
         end if;
         --dummy
         state <= state + 1;
-        writeline (output,debug_out_line);
+        writeline (DEBUG_OUT,debug_out_line);
+--        writeline (output,debug_out_line);
       end if;
       ostate <= "00000000" + state + 1;
     end if;
