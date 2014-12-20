@@ -3,6 +3,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use std.textio.ALL;
+use IEEE.std_logic_textio.all;
 
 entity core is
   Port (
@@ -17,7 +19,8 @@ entity core is
     debug_otpt : out std_logic_vector(31 downto 0);
     debug_otpt_code : out std_logic_vector(2 downto 0);
     debug_otpt_signal : out std_logic := '0';
-    waitwrite_from_parent : in std_logic_vector(19 downto 0)
+    waitwrite_from_parent : in std_logic_vector(19 downto 0);
+    read_signal : out std_logic := '0'
   );
 end core;
 
@@ -109,12 +112,18 @@ begin
       reg_out => reg_out_fpu
     );
   core_pro: process(clk)
+    variable debug_out_line : line;
+    variable debug_out_pc : integer;
+    variable debug_out_op : string (1 to 7);
+    variable debug_out_reg : string (1 to 3);
+    variable debug_out_dat : string (1 to 32);
   begin
     if (rising_edge(clk)) and (execute_ok = '1') then
       -- state action one
       if state = x"00" then
         -- initialize groups
         if phase = "000" then
+          debug_out_pc := conv_integer(rg (15));
           --Phase Fetch
           if waitwrite_from_parent = 0 then
             waitwriting <= '0';
@@ -151,7 +160,11 @@ begin
                   loaded_srcb <= ftdcode(15 downto 0)&"0000000000000000";
                 else
                   -- low
-                  loaded_srcb <= "0000000000000000"&ftdcode(15 downto 0);
+                  if ftdcode(15) = '1' then
+                    loaded_srcb <= "1111111111111111"&ftdcode(15 downto 0);
+                  else
+                    loaded_srcb <= "0000000000000000"&ftdcode(15 downto 0);
+                  end if;
                 end if;
               end if;
             else
@@ -229,7 +242,11 @@ begin
             else
               -- branch reg+imm type
               reg_in_a <= loaded_newpc;
-              reg_in_b <= x"0000" & "000" & ftdcode(12 downto 0);
+              if ftdcode(12) = '1' then
+                reg_in_b <= x"FFFF" & "111" & ftdcode(12 downto 0);
+              else
+                reg_in_b <= x"0000" & "000" & ftdcode(12 downto 0);
+              end if;
             end if;
           end if;
           --MEMORY
@@ -339,7 +356,7 @@ begin
               rg (conv_integer(ftdcode(24 downto 21))) <= sram_read;
             end if;
             -- hp <= hp + 4
-            rg (13) <= rg (13) + 4;
+--            rg (13) <= rg (13) + 4;
           end if;
           --Update PC (Branch case)
           if ftdcode(31 downto 30) = "10" then
@@ -395,10 +412,11 @@ begin
           end if;
           if ftdcode(31 downto 25) = "1110000" then
             --read
-            sram_go <= '1';
+--            sram_go <= '1';
+              read_signal <= '1';
             -- sram_addr <= hp(21 downto 2);
-            sram_addr <= rg (13) (21 downto 2);
-            sram_inst_type <= '0';
+--            sram_addr <= rg (13) (21 downto 2);
+--            sram_inst_type <= '0';
           end if;
         else
           sram_go <= '0';
@@ -407,8 +425,9 @@ begin
       if state = x"81" then
         --reflesh
         sram_go <= '0';
+        read_signal <= '0';
       end if;
-      if state = x"EE" then
+      if state = x"FE" then
         -- pickup groups
         -- Update cond_new_pc
         if phase = "011" then
@@ -449,7 +468,7 @@ begin
       end if;
       if phase = "001" then
         -- Decode
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -458,7 +477,7 @@ begin
       end if;
       if phase = "010" then
         -- Load
-        if state = x"04" then
+        if state = x"01" then
           --skip
           state <= x"FF";
         else
@@ -467,20 +486,26 @@ begin
       end if;
       if phase = "011" then
         -- Exec
-        if state = x"20" then
+        if state = x"10" then
           --skip
           state <= x"80";
         else
-          if state = x"A0" then
-            --skip
-            state <= x"EE";
+          if (state = x"81") and (ftdcode(31 downto 30) < 3) then
+            -- without SRAM
+            state <= x"FE";
           else
-            state <= state + 1;
+            -- without SRAM
+            if state = x"90" then
+              --skip
+              state <= x"FF";
+            else
+              state <= state + 1;
+            end if;
           end if;
         end if;
       end if;
       if phase = "100" then
-        if state = x"20" then
+        if state = x"01" then
           --skip
           state <= x"FF";
           phase <= "111";
@@ -489,8 +514,103 @@ begin
         end if;
       end if;
       if phase = "111" then
+        write (debug_out_line,integer'image(debug_out_pc));
+        write (debug_out_line,string'(" "));
+        case ftdcode(31 downto 25) is
+          when "0000000" =>
+            debug_out_op := "add    ";
+          when "0000001" =>
+            debug_out_op := "addi   ";
+          when "0000010" =>
+            debug_out_op := "sub    ";
+          when "0000011" =>
+            debug_out_op := "subi   ";
+          when "0000100" =>
+            debug_out_op := "not    ";
+          when "0000110" =>
+            debug_out_op := "and    ";
+          when "0001000" =>
+            debug_out_op := "or     ";
+          when "0001010" =>
+            debug_out_op := "xor    ";
+          when "0001100" =>
+            debug_out_op := "nand   ";
+          when "0001110" =>
+            debug_out_op := "nor    ";
+          when "0010000" =>
+            debug_out_op := "shift  ";
+          when "0010001" =>
+            debug_out_op := "shifti ";
+          when "0100000" =>
+            debug_out_op := "fadd   ";
+          when "0100010" =>
+            debug_out_op := "fsub   ";
+          when "0100100" =>
+            debug_out_op := "fmul   ";
+          when "0100110" =>
+            debug_out_op := "fdiv   ";
+          when "0101000" =>
+            debug_out_op := "fsqrt  ";
+          when "0101010" =>
+            debug_out_op := "ftoi   ";
+          when "0101100" =>
+            debug_out_op := "itof   ";
+          when "0101110" =>
+            debug_out_op := "fneg   ";
+          when "0110000" =>
+            debug_out_op := "finv   ";
+          when "1000000" =>
+            debug_out_op := "beq    ";
+          when "1000001" =>
+            debug_out_op := "beqi   ";
+          when "1000010" =>
+            debug_out_op := "blt    ";
+          when "1000011" =>
+            debug_out_op := "blti   ";
+          when "1000100" =>
+            debug_out_op := "bfeq   ";
+          when "1000101" =>
+            debug_out_op := "bfeqi  ";
+          when "1000110" =>
+            debug_out_op := "bflt   ";
+          when "1000111" =>
+            debug_out_op := "bflti  ";
+          when "1100000" =>
+            debug_out_op := "load   ";
+          when "1100010" =>
+            debug_out_op := "store  ";
+          when "1100100" =>
+            debug_out_op := "fload  ";
+          when "1100110" =>
+            debug_out_op := "fstore ";
+          when "1101000" =>
+            debug_out_op := "loadr  ";
+          when "1101010" =>
+            debug_out_op := "storer ";
+          when "1101100" =>
+            debug_out_op := "floadr ";
+          when "1101110" =>
+            debug_out_op := "fstorer";
+          when "1110000" =>
+            debug_out_op := "read   ";
+          when "1110001" =>
+            debug_out_op := "write  ";
+          when others => null;
+        end case;
+        write (debug_out_line,debug_out_op);
+        write (debug_out_line,string'(" "));
+        write (debug_out_line,integer'image(conv_integer (ftdcode(24 downto 21))));
+        write (debug_out_line,string'(" "));
+        hwrite (debug_out_line,ftdcode);
+        write (debug_out_line,string'(" "));
+        if ftdcode (31 downto 30) /= "01" or ftdcode (31 downto 25) = "0101010" then
+          write (debug_out_line,reg_out);
+        else
+          write (debug_out_line,reg_out_fpu);
+        end if;
         --dummy
         state <= state + 1;
+        writeline (output,debug_out_line);
       end if;
       ostate <= "00000000" + state + 1;
     end if;
