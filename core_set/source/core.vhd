@@ -454,6 +454,9 @@ begin
         if state = x"EE" then
           --skip
           state <= x"FF";
+        elsif state = x"01" then
+          --skip
+          state <= x"DD";
         else
           state <= state + 1;
         end if;
@@ -497,13 +500,9 @@ begin
         end if;
       end if;
       if phase = "100" then
-        if state = x"01" then
-          --skip
-          state <= x"FF";
-          phase <= "111";
-        else
-          state <= state + 1;
-        end if;
+        --skip
+        state <= x"FF";
+        phase <= "111";
       end if;
       if phase = "111" then
         --dummy
