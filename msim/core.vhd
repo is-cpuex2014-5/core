@@ -84,7 +84,7 @@ architecture cocore of core is
   signal loaded_srca : std_logic_vector(31 downto 0);
   signal loaded_srcb : std_logic_vector(31 downto 0);
   signal loaded_newpc : std_logic_vector(31 downto 0);
-  signal read_index : std_logic_vector(19 downto 0) := x"55555";
+  signal read_index : std_logic_vector(19 downto 0) := x"55554";
   signal waitwriting : std_logic := '0';
   file DEBUG_OUT : text open WRITE_MODE is "debug_out.txt";
 begin
@@ -357,7 +357,7 @@ begin
               rg (conv_integer(ftdcode(24 downto 21))) <= sram_read;
             end if;
             -- hp <= hp + 4
-            read_index <= read_index + 1;
+            read_index <= read_index - 1;
 --            rg (13) <= rg (13) + 4;
           end if;
           --Update PC (Branch case)
@@ -466,6 +466,9 @@ begin
         if state = x"EE" then
           --skip
           state <= x"FF";
+        elsif state = x"01" then
+          --skip
+          state <= x"DD";
         else
           state <= state + 1;
         end if;
@@ -509,7 +512,7 @@ begin
         end if;
       end if;
       if phase = "100" then
-        if state = x"01" then
+        if state = x"00" then
           --skip
           state <= x"FF";
           phase <= "111";
@@ -608,8 +611,8 @@ begin
         write (debug_out_line,string'(" "));
         hwrite (debug_out_line,ftdcode);
         write (debug_out_line,string'(" "));
-        if (ftdcode (31 downto 28)= "1100" and ftdcode (26 downto 25) = "00" ) or ftdcode (31 downto 25) = "1110000"then
-          -- load,fload,read
+        if (ftdcode (31 downto 29)= "110" and ftdcode (26 downto 25) = "00" ) or ftdcode (31 downto 25) = "1110000"then
+          -- load,fload,read,loadr,floadr
           write (debug_out_line,sram_read);
         elsif ftdcode (31 downto 30) /= "01" or ftdcode (31 downto 25) = "0101010" then
           write (debug_out_line,reg_out);
