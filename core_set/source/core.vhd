@@ -62,7 +62,6 @@ architecture cocore of core is
   signal phase : std_logic_vector(2 downto 0) := "111";
     --phase: active phase (without pipelines)
   signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
-  signal ftdcode : std_logic_vector(31 downto 0);
   signal opccode_alu : std_logic_vector(6 downto 0);
   signal reg_in_a : std_logic_vector(31 downto 0);
   signal reg_in_b : std_logic_vector(31 downto 0);
@@ -110,6 +109,7 @@ begin
       reg_out => reg_out_fpu
     );
   core_pro: process(clk)
+    variable ftdcode : std_logic_vector(31 downto 0);
   begin
     if (rising_edge(clk)) and (execute_ok = '1') then
       -- state action one
@@ -126,16 +126,14 @@ begin
             waitwriting <= '1';
           end if;
         end if;
-        if phase = "001" then
+        if phase = "010" then
           --Phase Decode
           if waitwriting = '0' then
-            ftdcode <= sram_read;
+            ftdcode :=  sram_read;
           else
             --nop
-            ftdcode <= x"FFFFFFFF";
+            ftdcode :=  x"FFFFFFFF";
           end if;
-        end if;
-        if phase = "010" then
           --Phase Load
           -- ALU
           if ftdcode(31 downto 30) = "00" then
@@ -457,15 +455,8 @@ begin
         elsif state = x"01" then
           --skip
           state <= x"DD";
-        else
-          state <= state + 1;
-        end if;
-      end if;
-      if phase = "001" then
-        -- Decode
-        if state = x"01" then
-          --skip
-          state <= x"FF";
+        elsif state = x"FF" then
+          phase <= "010";
         else
           state <= state + 1;
         end if;
