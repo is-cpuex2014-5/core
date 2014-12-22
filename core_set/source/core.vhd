@@ -457,6 +457,7 @@ begin
           state <= x"DD";
         elsif state = x"FF" then
           phase <= "010";
+          state <= x"00";
         else
           state <= state + 1;
         end if;
