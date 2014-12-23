@@ -454,7 +454,7 @@ begin
           state <= x"FF";
         elsif state = x"01" then
           --skip
-          state <= x"DD";
+          state <= x"E0";
         elsif state = x"FF" then
           phase <= "010";
           state <= x"00";
@@ -473,7 +473,7 @@ begin
       end if;
       if phase = "011" then
         -- Exec
-        if state = x"10" then
+        if state = x"05" then
           --skip
           state <= x"80";
         else
