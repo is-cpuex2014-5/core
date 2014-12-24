@@ -62,7 +62,6 @@ architecture cocore of core is
   signal phase : std_logic_vector(2 downto 0) := "111";
     --phase: active phase (without pipelines)
   signal cond_new_pc : std_logic_vector(31 downto 0) := x"00000000";
-  signal ftdcode : std_logic_vector(31 downto 0);
   signal opccode_alu : std_logic_vector(6 downto 0);
   signal reg_in_a : std_logic_vector(31 downto 0);
   signal reg_in_b : std_logic_vector(31 downto 0);
@@ -84,6 +83,10 @@ architecture cocore of core is
   signal loaded_newpc : std_logic_vector(31 downto 0);
   signal read_index : std_logic_vector(19 downto 0) := x"00000";
   signal waitwriting : std_logic := '0';
+  type cache_array is array(65535 downto 0) of std_logic_vector(31 downto 0);
+  signal cache_inst : cache_array := (others => x"00000000");
+  signal cache_inst_addr : cache_array := (others => x"FFFFFFFF");
+  signal cache_found : std_logic := '0';
 begin
   with_alu: alu Port map (
       clk => clk,
@@ -110,6 +113,7 @@ begin
       reg_out => reg_out_fpu
     );
   core_pro: process(clk)
+    variable ftdcode : std_logic_vector(31 downto 0);
   begin
     if (rising_edge(clk)) and (execute_ok = '1') then
       -- state action one
@@ -118,25 +122,38 @@ begin
         if phase = "000" then
           --Phase Fetch
           if waitwrite_from_parent = 0 then
-            waitwriting <= '0';
-            sram_go <= '1';
-            sram_addr <= rg (15) (21 downto 2);
-            sram_inst_type <= '0';
+            if cache_inst_addr(conv_integer(rg(15)(17 downto 2))) = rg(15) then
+              -- cache match
+              cache_found <= '1';
+            else
+              -- cache mismatch
+              cache_found <= '0';
+              waitwriting <= '0';
+              sram_go <= '1';
+              sram_addr <= rg (15) (21 downto 2);
+              sram_inst_type <= '0';
+            end if;
           else
             waitwriting <= '1';
           end if;
         end if;
-        if phase = "001" then
-          --Phase Decode
+        if phase = "010" then
+          --Phase Decode and Load (Decode Side)
           if waitwriting = '0' then
-            ftdcode <= sram_read;
+            if cache_found <= '1' then
+              ftdcode := cache_inst(conv_integer(rg(15)(17 downto 2)));
+            else
+              ftdcode := sram_read;
+              -- update cache
+              cache_inst(conv_integer(rg(15)(17 downto 2))) <= sram_read;
+              cache_inst_addr(conv_integer(rg(15)(17 downto 2))) <= rg(15);
+            end if;
+            ftdcode := sram_read;
           else
             --nop
-            ftdcode <= x"FFFFFFFF";
+            ftdcode := x"FFFFFFFF";
           end if;
-        end if;
-        if phase = "010" then
-          --Phase Load
+          --Phase Decode and Load (Load Side)
           -- ALU
           if ftdcode(31 downto 30) = "00" then
             --set source A
@@ -354,14 +371,20 @@ begin
           if ftdcode(31 downto 30) = "10" then
             --pc <= cond_new_pc;
             rg (15) <= cond_new_pc;
-          elsif ftdcode(31 downto 0) = x"FFFFFFFF" then
-          -- added nop
-          elsif ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
-          -- The Case when update pc by ALU,load,loadr
-          elsif ((ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000")) and (ftdcode(24 downto 21) = x"F") then
           else
-            --pc <= pc + 4;   
-            rg (15) <= rg (15) + 4;
+            if ftdcode(31 downto 0) = x"FFFFFFFF" then
+              -- added nop
+            else
+              -- The Case when update pc by ALU,load,loadr
+              if ((ftdcode(31 downto 30) = "00") or (ftdcode(31 downto 25) = "0101010")) and (ftdcode(24 downto 21) = x"F") then
+              else
+                if ((ftdcode(31 downto 25) = "1100000") or (ftdcode(31 downto 25) = "1101000")) and (ftdcode(24 downto 21) = x"F") then
+                else
+                  --pc <= pc + 4;   
+                  rg (15) <= rg (15) + 4;
+                end if;
+              end if;
+            end if;
           end if;
         end if;
       else
@@ -425,11 +448,13 @@ begin
               -- cond_new_pc <= pc + 4;
               cond_new_pc <= rg (15) + 4;
             end if;            
-          elsif cond_out_compr = '1' then
-            cond_new_pc <= reg_out;
           else
-            -- cond_new_pc <= pc + 4;
-            cond_new_pc <= rg (15) + 4;
+            if cond_out_compr = '1' then
+              cond_new_pc <= reg_out;
+            else
+              -- cond_new_pc <= pc + 4;
+              cond_new_pc <= rg (15) + 4;
+            end if;
           end if;
         end if;
       end if;
@@ -443,18 +468,19 @@ begin
       --state update
       if phase = "000" then
         -- Fetch
-        if state = x"EE" then
+        if state = x"EA" then
           --skip
           state <= x"FF";
-        else
-          state <= state + 1;
-        end if;
-      end if;
-      if phase = "001" then
-        -- Decode
-        if state = x"01" then
+        elsif state = x"01" then
           --skip
-          state <= x"FF";
+          if (cache_found = '1') or (waitwriting = '1') then
+            state <= x"FF";
+          else
+            state <= x"E0";
+          end if;
+        elsif state = x"FF" then
+          phase <= "010";
+          state <= x"00";
         else
           state <= state + 1;
         end if;
@@ -470,29 +496,28 @@ begin
       end if;
       if phase = "011" then
         -- Exec
-        if state = x"10" then
+        if state = x"05" then
           --skip
           state <= x"80";
-        elsif (state = x"81") and (ftdcode(31 downto 30) < 3) then
-          -- without SRAM
-          state <= x"FE";
-        -- without SRAM
-        elsif state = x"90" then
-          --skip
-          state <= x"FF";
         else
-          state <= state + 1;
+          if (state = x"81") and (ftdcode(31 downto 30) < 3) then
+            -- without SRAM
+            state <= x"FE";
+          else
+            -- with SRAM
+            if state = x"8A" then
+              --skip
+              state <= x"FF";
+            else
+              state <= state + 1;
+            end if;
+          end if;
         end if;
       end if;
       if phase = "100" then
-        -- Store
-        if state = x"01" then
-          --skip
-          state <= x"FF";
-          phase <= "111";
-        else
-          state <= state + 1;
-        end if;
+        --skip
+        state <= x"FF";
+        phase <= "111";
       end if;
       if phase = "111" then
         --dummy

@@ -263,16 +263,16 @@ begin
         end if;
         if sram_read_transfer_mode = '1' then
           -- read 命令
-          if read_counter_old = 3 then
+          if read_counter_old = 0 then
             core_sram_read <= x"000000" & sram_read(7 downto 0);
           end if;
-          if read_counter_old = 2 then
+          if read_counter_old = 1 then
             core_sram_read <= x"000000" & sram_read(15 downto 8);
           end if;
-          if read_counter_old = 1 then
+          if read_counter_old = 2 then
             core_sram_read <= x"000000" & sram_read(23 downto 16);
           end if;
-          if read_counter_old = 0 then
+          if read_counter_old = 3 then
             core_sram_read <= x"000000" & sram_read(31 downto 24);
           end if;
         else
