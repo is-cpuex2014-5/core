@@ -101,7 +101,7 @@ architecture cpu_top of top is
   end component;
   signal exok : std_logic := '0';
   signal exok_from_read : std_logic := '0';
-  signal top_state : std_logic_vector(2 downto 0) := "000";
+  signal top_state : std_logic := '0';
   signal hogge : std_logic_vector(7 downto 0);
   signal debug_otpt : std_logic_vector(31 downto 0);
   signal debug_otpt_code : std_logic_vector(2 downto 0);
@@ -214,11 +214,11 @@ begin
       else
         waitwrite_to_core <= x"C0C0A";
       end if;
-      if top_state = "000" then
+      if top_state = '0' then
         --Input Wait
         if exok_from_read = '1' then
           exok <= '1';
-          top_state <= "001";
+          top_state <= '1';
           if u232c_busy = '0' then
             u232c_data_reg <= x"00000057";
             u232c_showtype <= "000";
@@ -252,7 +252,7 @@ begin
           sram_go <= '0';
         end if;
       end if;
-      if top_state = "001" then
+      if top_state = '1' then
         --Execution
         if u232c_busy = '0' then
           u232c_data_reg <= debug_otpt;
