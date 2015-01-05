@@ -14,8 +14,7 @@ entity core is
     sram_addr : out std_logic_vector(19 downto 0);
     sram_read : in std_logic_vector(31 downto 0);
     sram_write : out std_logic_vector(31 downto 0);
-    debug_otpt : out std_logic_vector(31 downto 0);
-    debug_otpt_code : out std_logic_vector(2 downto 0);
+    debug_otpt : out std_logic_vector(7 downto 0);
     debug_otpt_signal : out std_logic := '0';
     waitwrite_from_parent : in std_logic_vector(19 downto 0);
     read_signal : out std_logic := '0'
@@ -279,23 +278,21 @@ begin
           if ftdcode(31 downto 25) = "1110001" then
             -- write
             if ftdcode(24 downto 21) /= x"0" then
-              debug_otpt <= rg (conv_integer(ftdcode(24 downto 21)));
+              debug_otpt <= rg (conv_integer(ftdcode(24 downto 21))) (7 downto 0);
             end if;
-            debug_otpt_code <= "000";
             debug_otpt_signal <= '1';
           else
             if ftdcode(31 downto 20) = x"FFD" then
             -- Debug Output
               if ftdcode(3 downto 0) = x"1" then
-                debug_otpt <= rg(1);
+                debug_otpt <= rg(1) (7 downto 0);
               end if;
               if ftdcode(3 downto 0) = x"2" then
-                debug_otpt <= rg(2);
+                debug_otpt <= rg(2) (7 downto 0);
               end if;
               if ftdcode(3 downto 0) = x"3" then
-                debug_otpt <= rg(3);
+                debug_otpt <= rg(3) (7 downto 0);
               end if;
-              debug_otpt_code <= ftdcode(6 downto 4);
               debug_otpt_signal <= '1';
             else
               debug_otpt_signal <= '0';

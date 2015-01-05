@@ -7,8 +7,7 @@ entity u232c is
   generic (wtime : std_logic_vector(15 downto 0) := x"1ADB");
   Port (
     clk : in std_logic;
-    data_reg : in std_logic_vector(31 downto 0);
-    showtype : in std_logic_vector(2 downto 0);
+    data_reg : in std_logic_vector(7 downto 0);
     go : in std_logic;
     busy : out std_logic;
     tx : out std_logic);
@@ -45,12 +44,7 @@ begin
       end if;
       if state = x"A" then
         if go = '1' then
-          if showtype = "000" then
-            send_buf <=  data_reg(7 downto 0) & '0';
-          end if;
-          if showtype = "001" then
-            send_buf <=  data_reg(7 downto 0) & '0';
-          end if;
+          send_buf <=  data_reg & '0';
           state <= x"0";
           countdown <= wtime;
           busy <= '1';
