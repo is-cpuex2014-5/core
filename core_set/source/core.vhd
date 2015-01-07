@@ -282,21 +282,21 @@ begin
             end if;
             debug_otpt_signal <= '1';
           else
-            if ftdcode(31 downto 20) = x"FFD" then
-            -- Debug Output
-              if ftdcode(3 downto 0) = x"1" then
-                debug_otpt <= rg(1) (7 downto 0);
-              end if;
-              if ftdcode(3 downto 0) = x"2" then
-                debug_otpt <= rg(2) (7 downto 0);
-              end if;
-              if ftdcode(3 downto 0) = x"3" then
-                debug_otpt <= rg(3) (7 downto 0);
-              end if;
-              debug_otpt_signal <= '1';
-            else
+            --if ftdcode(31 downto 20) = x"FFD" then
+            ---- Debug Output
+            --  if ftdcode(3 downto 0) = x"1" then
+            --    debug_otpt <= rg(1) (7 downto 0);
+            --  end if;
+            --  if ftdcode(3 downto 0) = x"2" then
+            --    debug_otpt <= rg(2) (7 downto 0);
+            --  end if;
+            --  if ftdcode(3 downto 0) = x"3" then
+            --    debug_otpt <= rg(3) (7 downto 0);
+            --  end if;
+            --  debug_otpt_signal <= '1';
+            --else
               debug_otpt_signal <= '0';
-            end if;
+            --end if;
           end if;
           -- Debug NOP(all FFFFFFF case doesn't update PC)
         else

@@ -215,7 +215,7 @@ begin
     );
   with_write_buff: write_buff
     generic map (
-      buff_size => 256)
+      buff_size => 255)
     port map (
       clk      => clk,
       data_in  => debug_otpt,
