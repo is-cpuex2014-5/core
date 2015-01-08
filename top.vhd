@@ -239,7 +239,7 @@ begin
             if u232c_busy = '0' then
               u232c_data_reg <= x"0000003" & inputc_write_value(3 downto 0);
               u232c_showtype <= "000";
-              u232c_go <= '1';
+              --u232c_go <= '1';
             else
               u232c_go <= '0';
             end if;
