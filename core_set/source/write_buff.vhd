@@ -37,10 +37,11 @@ begin  -- architecture rtl
     variable read_stop : std_logic := '0';
     variable buff_read_side : integer range 0 to 65535 := 0;
     variable buff_write_side  : integer range 0 to 65535 := 0;
+    variable just_wrote : std_logic := '0';
   begin  -- process write_loop
     if rising_edge (clk) then
       -- pop queue
-      if busy_in = '0' and write_stop = '0' then
+      if busy_in = '0' and write_stop = '0' and just_wrote = '0' then
         data_out <= buff (buff_write_side);
         go_out <= '1';
         buff_write_side := incr(buff_write_side);
@@ -50,7 +51,9 @@ begin  -- architecture rtl
         else
           write_stop := '0';
         end if;
+        just_wrote := '1';
       else
+        just_wrote := '0';
         go_out <= '0';
       end if;
       -- push queue
