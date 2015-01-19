@@ -137,6 +137,7 @@ architecture cpu_top of top is
   signal sram_read_transfer_mode : std_logic := '0'; -- 0: normal  1: read_signal_ver
   signal read_counter : std_logic_vector(1 downto 0) := "00";
   signal read_counter_old : std_logic_vector(1 downto 0) := "00";
+  signal write_buff_busy : std_logic := '0';
 begin
   -- HW 実験当時の top より
   ib: IBUFG port map (
@@ -149,67 +150,77 @@ begin
     );
   rs232c : u232c generic map (wtime => x"1ADB")
   Port map (
-    clk => clk,
+    clk      => clk,
     data_reg => u232c_data_reg,
-    showtype => u232c_showtype,
-    go => u232c_go,
-    busy => u232c_busy,
-    tx => rs_tx
+    go       => u232c_go,
+    busy     => u232c_busy,
+    tx       => rs_tx
     );
   with_inputc : inputc Port map (
-    clk => clk,
-    execute_ok => exok_from_read,
-    debug_read => debug_otpt_inputc,
+    clk         => clk,
+    execute_ok  => exok_from_read,
+    debug_read  => debug_otpt_inputc,
     write_value => inputc_write_value,
-    write_addr => inputc_write_addr,
-    write_ok => inputc_write_ok,
-    rx => rs_rx
+    write_addr  => inputc_write_addr,
+    write_ok    => inputc_write_ok,
+    rx          => rs_rx
     );
   core_send: core Port map (
-    clk => clk,
-    execute_ok => exok,
-    ostate => hogge,
-    sram_go => core_sram_go,
-    sram_inst_type => core_sram_inst_type,
-    sram_read => core_sram_read,
-    sram_write => core_sram_write,
-    sram_addr => core_sram_addr,
-    debug_otpt => debug_otpt,
-    debug_otpt_code => debug_otpt_code,
-    debug_otpt_signal => debug_otpt_signal,
+    clk                   => clk,
+    execute_ok            => exok,
+    ostate                => hogge,
+    sram_go               => core_sram_go,
+    sram_inst_type        => core_sram_inst_type,
+    sram_read             => core_sram_read,
+    sram_write            => core_sram_write,
+    sram_addr             => core_sram_addr,
+    debug_otpt            => debug_otpt,
+    debug_otpt_signal     => debug_otpt_signal,
     waitwrite_from_parent => waitwrite_to_core,
-    read_signal => read_signal
+    read_signal           => read_signal
     );
   withsram: sram Port map (
-    clk => clk,
-    SRXGA => XGA,
-    SRXE1 => XE1,
-    SRE2A => E2A,
-    SRXE3 => XE3,
-    SRXZCKE => XZCKE,
-    SRADVA => ADVA,
-    SRXLBO => XLBO,
-    SRZZA => ZZA,
-    SRXFT => XFT,
-    SRZCLKMA => ZCLKMA,
-    SRZD => ZD,
-    SRZDP => ZDP,
-    SRZA => ZA,
-    SRIOA => IOA,
-    SRXZBE => XZBE,
-    SRXWA => XWA,
-    SRXRST => XRST,
-    sram_go => sram_go,
-    sram_busy => sram_busy,
+    clk            => clk,
+    SRXGA          => XGA,
+    SRXE1          => XE1,
+    SRE2A          => E2A,
+    SRXE3          => XE3,
+    SRXZCKE        => XZCKE,
+    SRADVA         => ADVA,
+    SRXLBO         => XLBO,
+    SRZZA          => ZZA,
+    SRXFT          => XFT,
+    SRZCLKMA       => ZCLKMA,
+    SRZD           => ZD,
+    SRZDP          => ZDP,
+    SRZA           => ZA,
+    SRIOA          => IOA,
+    SRXZBE         => XZBE,
+    SRXWA          => XWA,
+    SRXRST         => XRST,
+    sram_go        => sram_go,
+    sram_busy      => sram_busy,
     sram_inst_type => sram_inst_type,
-    sram_read => sram_read,
-    sram_write => sram_write,
-    sram_addr => sram_addr
+    sram_read      => sram_read,
+    sram_write     => sram_write,
+    sram_addr      => sram_addr
     );
+  with_write_buff: write_buff
+    generic map (
+      buff_size => 65535)
+    port map (
+      clk      => clk,
+      data_in  => debug_otpt,
+      go_in    => debug_otpt_signal,
+      busy_in  => u232c_busy,
+      data_out => u232c_data_reg,
+      go_out   => u232c_go,
+      busy_out => write_buff_busy);
+
   cpu_top_main : process
   begin
     if rising_edge(clk) then
-      if u232c_busy = '0' then
+      if write_buff_busy = '0' then
         waitwrite_to_core <= x"00000";
       else
         waitwrite_to_core <= x"C0C0A";
@@ -219,13 +230,6 @@ begin
         if exok_from_read = '1' then
           exok <= '1';
           top_state <= "001";
-          if u232c_busy = '0' then
-            u232c_data_reg <= x"00000057";
-            u232c_showtype <= "000";
-            --u232c_go <= '1';
-          else
-            u232c_go <= '0';
-          end if;
         end if;
         if sram_busy = '0' then
           if inputc_write_ok = '1' then
@@ -236,31 +240,14 @@ begin
             sram_write <= inputc_write_value;
             debug_saved_value <= inputc_write_value;
             sigcount <= x"8";
-            if u232c_busy = '0' then
-              u232c_data_reg <= x"0000003" & inputc_write_value(3 downto 0);
-              u232c_showtype <= "000";
-              --u232c_go <= '1';
-            else
-              u232c_go <= '0';
-            end if;
           else
-            u232c_go <= '0';
             sram_go <= '0';
           end if;
         else
-          u232c_go <= '0';
           sram_go <= '0';
         end if;
       end if;
       if top_state = "001" then
-        --Execution
-        if u232c_busy = '0' then
-          u232c_data_reg <= debug_otpt;
-          u232c_showtype <= debug_otpt_code;
-          u232c_go <= debug_otpt_signal;
-        else
-          u232c_go <= '0';
-        end if;
         if sram_read_transfer_mode = '1' then
           -- read 命令
           if read_counter_old = 0 then
@@ -281,14 +268,14 @@ begin
         end if;
         if read_signal = '1' then
           if sram_busy = '0' then
-            sram_go <= '1';
+            sram_go        <= '1';
             sram_inst_type <= '0';
-            sram_addr <= read_inst_addr;
+            sram_addr      <= read_inst_addr;
             if read_counter = 3 then
               read_inst_addr <= read_inst_addr - 1;
             end if;
-            read_counter_old <= read_counter;
-            read_counter <= read_counter + 1;
+            read_counter_old        <= read_counter;
+            read_counter            <= read_counter + 1;
             sram_read_transfer_mode <= '1';
           end if;
         else
@@ -297,14 +284,14 @@ begin
               sram_go <= '1';
               if core_sram_inst_type = '0' then
                 --read
-                sram_inst_type <= '0';
-                sram_addr <= core_sram_addr;
+                sram_inst_type          <= '0';
+                sram_addr               <= core_sram_addr;
                 sram_read_transfer_mode <= '0';
               else
                 --write
                 sram_inst_type <= '1';
-                sram_addr <= core_sram_addr;
-                sram_write <= core_sram_write;
+                sram_addr      <= core_sram_addr;
+                sram_write     <= core_sram_write;
               end if;
             else
               sram_go <= '0';

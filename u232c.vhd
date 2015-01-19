@@ -7,8 +7,7 @@ entity u232c is
   generic (wtime : std_logic_vector(15 downto 0) := x"1ADB");
   Port (
     clk : in std_logic;
-    data_reg : in std_logic_vector(31 downto 0);
-    showtype : in std_logic_vector(2 downto 0);
+    data_reg : in std_logic_vector(7 downto 0);
     go : in std_logic;
     busy : out std_logic;
     tx : out std_logic);
