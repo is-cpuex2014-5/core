@@ -45,12 +45,7 @@ begin
       end if;
       if state = x"A" then
         if go = '1' then
-          if showtype = "000" then
-            send_buf <=  (base_ln + data_reg(7 downto 0)) & "0";
-          end if;
-          if showtype = "001" then
-            send_buf <=  (base_ln + data_reg(7 downto 0)) & "0";
-          end if;
+          send_buf <=  (base_ln + data_reg(7 downto 0)) & "0";
           state <= x"0";
           countdown <= wtime;
           busy <= '1';
