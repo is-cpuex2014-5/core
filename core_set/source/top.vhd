@@ -8,92 +8,93 @@ use UNISIM.VComponents.all;
 
 -- CPUEV2(HW09) より
 entity top is
-  Port (MCLK1   : in    STD_LOGIC;
-         RS_TX  : out   STD_LOGIC;
-         XGA    : out   STD_LOGIC;
-         XE1    : out   STD_LOGIC;
-         E2A    : out   STD_LOGIC;
-         XE3    : out   STD_LOGIC;
-         XZCKE  : out   STD_LOGIC;
-         ADVA   : out   STD_LOGIC;
-         XLBO   : out   STD_LOGIC;
-         ZZA    : out   STD_LOGIC;
-         XFT    : out   STD_LOGIC;
-         ZCLKMA : out   STD_LOGIC_VECTOR (1 downto 0);
-         ZD     : inout STD_LOGIC_VECTOR (31 downto 0);
-         ZDP    : inout STD_LOGIC_VECTOR (3 downto 0);
-         ZA     : inout STD_LOGIC_VECTOR (19 downto 0);
-         IOA    :       STD_LOGIC_VECTOR (126 downto 0);
-         XZBE   : inout STD_LOGIC_VECTOR (3 downto 0);
-         XWA    : out   STD_LOGIC;
-         XRST   : in    STD_LOGIC;
-         RS_RX  : in    STD_LOGIC);
+  Port ( MCLK1 : in  STD_LOGIC;
+         RS_TX : out  STD_LOGIC;
+         XGA : out STD_LOGIC;
+         XE1 : out STD_LOGIC;
+         E2A : out STD_LOGIC;
+         XE3 : out STD_LOGIC;
+         XZCKE : out STD_LOGIC;
+         ADVA : out STD_LOGIC;
+         XLBO : out STD_LOGIC;
+         ZZA : out STD_LOGIC;
+         XFT : out STD_LOGIC;
+         ZCLKMA : out STD_LOGIC_VECTOR (1 downto 0);
+         ZD : inout STD_LOGIC_VECTOR (31 downto 0);
+         ZDP : inout STD_LOGIC_VECTOR (3 downto 0);
+         ZA : inout STD_LOGIC_VECTOR (19 downto 0);
+         IOA : STD_LOGIC_VECTOR (126 downto 0);
+         XZBE : inout STD_LOGIC_VECTOR (3 downto 0);
+         XWA : out STD_LOGIC;
+         XRST : in STD_LOGIC;
+         RS_RX : in STD_LOGIC
+        );
 end top;
 
 architecture cpu_top of top is
   signal clk,iclk : std_logic;
   --testbench signal
   component core Port (
-    clk                   : in  std_logic;
-    execute_ok            : in  std_logic;
-    ostate                : out std_logic_vector(7 downto 0);
-    sram_go               : out std_logic;
-    sram_inst_type        : out std_logic;
-    sram_addr             : out std_logic_vector(19 downto 0);
-    sram_read             : in  std_logic_vector(31 downto 0);
-    sram_write            : out std_logic_vector(31 downto 0);
-    debug_otpt            : out std_logic_vector(7 downto 0);
-    debug_otpt_signal     : out std_logic;
-    waitwrite_from_parent : in  std_logic_vector(19 downto 0);
-    read_signal           : out std_logic
+    clk: in std_logic;
+    execute_ok: in std_logic;
+    ostate: out std_logic_vector(7 downto 0);
+    sram_go : out std_logic;
+    sram_inst_type : out std_logic;
+    sram_addr : out std_logic_vector(19 downto 0);
+    sram_read : in std_logic_vector(31 downto 0);
+    sram_write : out std_logic_vector(31 downto 0);
+    debug_otpt: out std_logic_vector(7 downto 0);
+    debug_otpt_signal: out std_logic;
+    waitwrite_from_parent : in std_logic_vector(19 downto 0);
+    read_signal: out std_logic
   );
   end component;
   component sram Port (
-    clk            : in    std_logic;
-    SRXGA          : out   STD_LOGIC;
-    SRXE1          : out   STD_LOGIC;
-    SRE2A          : out   STD_LOGIC;
-    SRXE3          : out   STD_LOGIC;
-    SRXZCKE        : out   STD_LOGIC;
-    SRADVA         : out   STD_LOGIC;
-    SRXLBO         : out   STD_LOGIC;
-    SRZZA          : out   STD_LOGIC;
-    SRXFT          : out   STD_LOGIC;
-    SRZCLKMA       : out   STD_LOGIC_VECTOR (1 downto 0);
-    SRZD           : inout STD_LOGIC_VECTOR (31 downto 0);
-    SRZDP          : inout STD_LOGIC_VECTOR (3 downto 0);
-    SRZA           : inout STD_LOGIC_VECTOR (19 downto 0);
-    SRIOA          :       STD_LOGIC_VECTOR (126 downto 0);
-    SRXZBE         : inout STD_LOGIC_VECTOR (3 downto 0);
-    SRXWA          : out   STD_LOGIC;
-    SRXRST         : in    STD_LOGIC;
-    sram_go        : in    std_logic;
-    sram_busy      : out   std_logic;
-    sram_inst_type : in    std_logic;
-    sram_read      : out   std_logic_vector(31 downto 0);
-    sram_write     : in    std_logic_vector(31 downto 0);
-    sram_addr      : in    std_logic_vector(19 downto 0)
+    clk: in std_logic;
+    SRXGA : out STD_LOGIC;
+    SRXE1 : out STD_LOGIC;
+    SRE2A : out STD_LOGIC;
+    SRXE3 : out STD_LOGIC;
+    SRXZCKE : out STD_LOGIC;
+    SRADVA : out STD_LOGIC;
+    SRXLBO : out STD_LOGIC;
+    SRZZA : out STD_LOGIC;
+    SRXFT : out STD_LOGIC;
+    SRZCLKMA : out STD_LOGIC_VECTOR (1 downto 0);
+    SRZD : inout STD_LOGIC_VECTOR (31 downto 0);
+    SRZDP : inout STD_LOGIC_VECTOR (3 downto 0);
+    SRZA : inout STD_LOGIC_VECTOR (19 downto 0);
+    SRIOA : STD_LOGIC_VECTOR (126 downto 0);
+    SRXZBE : inout STD_LOGIC_VECTOR (3 downto 0);
+    SRXWA : out STD_LOGIC;
+    SRXRST : in STD_LOGIC;
+    sram_go : in std_logic;
+    sram_busy : out std_logic;
+    sram_inst_type : in std_logic;
+    sram_read : out std_logic_vector(31 downto 0);
+    sram_write : in std_logic_vector(31 downto 0);
+    sram_addr : in std_logic_vector(19 downto 0)
   );
   end component;
   component u232c
     generic (wtime: std_logic_vector(15 downto 0) := x"1ADB");
     Port (
-      clk      : in  std_logic;
-      data_reg : in  std_logic_vector(7 downto 0);
-      go       : in  std_logic;
-      busy     : out std_logic;
-      tx       : out std_logic
+      clk : in std_logic;
+      data_reg : in std_logic_vector(7 downto 0);
+      go : in std_logic;
+      busy : out std_logic;
+      tx : out std_logic
     );
   end component;
   component inputc
     Port (
-      clk         : in  std_logic;
-      execute_ok  : out std_logic;
-      debug_read  : out std_logic_vector(7 downto 0);
+      clk : in std_logic;
+      execute_ok : out std_logic;
+      debug_read : out std_logic_vector(7 downto 0);
       write_value : out std_logic_vector(31 downto 0);
-      write_addr  : out std_logic_vector(19 downto 0);
-      write_ok    : out std_logic;
-      rx          : in  std_logic
+      write_addr : out std_logic_vector(19 downto 0);
+      write_ok : out std_logic;
+      rx : in std_logic
     );
   end component;
   component write_buff is
@@ -108,7 +109,6 @@ architecture cpu_top of top is
       go_out   : out std_logic;
       busy_out : out std_logic);
   end component write_buff;
-
   signal exok : std_logic := '0';
   signal exok_from_read : std_logic := '0';
   signal top_state : std_logic := '0';
@@ -117,6 +117,7 @@ architecture cpu_top of top is
   signal debug_otpt_signal : std_logic;
   signal debug_otpt_inputc : std_logic_vector(7 downto 0);
   signal u232c_data_reg : std_logic_vector(7 downto 0);
+  signal u232c_showtype : std_logic_vector(2 downto 0);
   signal u232c_go : std_logic := '0';
   signal u232c_busy : std_logic;
   signal inputc_write_value : std_logic_vector(31 downto 0);
@@ -236,18 +237,18 @@ begin
       if top_state = '0' then
         --Input Wait
         if exok_from_read = '1' then
-          exok      <= '1';
+          exok <= '1';
           top_state <= '1';
         end if;
         if sram_busy = '0' then
           if inputc_write_ok = '1' then
-            sram_go           <= '1';
+            sram_go <= '1';
             --write
-            sram_inst_type    <= '1';
-            sram_addr         <= inputc_write_addr;
-            sram_write        <= inputc_write_value;
+            sram_inst_type <= '1';
+            sram_addr <= inputc_write_addr;
+            sram_write <= inputc_write_value;
             debug_saved_value <= inputc_write_value;
-            sigcount          <= x"8";
+            sigcount <= x"8";
           else
             sram_go <= '0';
           end if;
