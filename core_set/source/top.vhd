@@ -77,7 +77,7 @@ architecture cpu_top of top is
   );
   end component;
   component u232c
-    generic (wtime: std_logic_vector(15 downto 0) := x"1ADB");
+    generic (wtime: std_logic_vector(15 downto 0) := x"0D6D");
     Port (
       clk : in std_logic;
       data_reg : in std_logic_vector(7 downto 0);
@@ -157,7 +157,7 @@ begin
     i => iclk,
     o => clk
     );
-  rs232c : u232c generic map (wtime => x"1ADB")
+  rs232c : u232c generic map (wtime => x"0D6D")
   Port map (
     clk      => clk,
     data_reg => u232c_data_reg,

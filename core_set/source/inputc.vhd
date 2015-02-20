@@ -1,4 +1,4 @@
--- 1C06:  6+     +28*256=7174
+-- 0E03:  6+     +28*256=7174
 -- 1ADB: 11+13*16+26*256=6875
 -- read data
 -- execute command "X"
@@ -48,7 +48,7 @@ begin
             if startbit_log(19) = '1' then
               if one_chan < 4 then
                 state <= x"0";
-                countdown <= x"1C06" - 540;
+                countdown <= x"0E03" - 270;
                 readbuf <= x"00";
                 one_chan <= x"14"; -- 20
                 startbit_log <= x"FFFFF";
@@ -69,7 +69,7 @@ begin
         end if;
       end if;
       if (state > 0) and (state < 9) then
-        if readcount = 1200 then
+        if readcount = 600 then
           readcount <= x"0000";
           if rx = '0' then
             readzero <= readzero + 1;
@@ -94,13 +94,13 @@ begin
         if countdown = 0 then
           -- move to next state
           state <= state + 1;
-          countdown <= x"1C06";
+          countdown <= x"0E03";
           readcount <= x"0000";
           readzero <= "000";
           readone <= "000";
           write_ok <= '0';
         else
-          if (state = 9) and (countdown = 3000) then
+          if (state = 9) and (countdown = 750) then
             --skip and end of read char
             countdown <= x"0000";
             state <= state + 1;
