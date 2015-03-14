@@ -75,7 +75,7 @@ begin
             end if;
           end if;
         end if;
-        if noisecheck_counter = 30 then
+        if noisecheck_counter = 15 then
           if rx = '0' then
             if startbit_log(19) = '1' then
               if one_chan < 4 then
@@ -134,7 +134,7 @@ begin
           readone <= "000";
           write_ok <= '0';
         else
-          if (state = 9) and (countdown = 750) then
+          if (state = 9) and (countdown = 1500) then
             --skip and end of read char
             countdown <= x"0000";
             state <= state + 1;
