@@ -62,6 +62,12 @@ architecture fpu_man_main of fpu_man is
     Q : out std_logic_vector(31 downto 0)
   );
   end component;
+  component fabs Port (
+    A : in std_logic_vector(31 downto 0);
+    CLK : in std_logic;
+    Q : out std_logic_vector(31 downto 0)
+  );
+  end component;
   component feq Port (
     A : in std_logic_vector(31 downto 0);
     B : in std_logic_vector(31 downto 0);
@@ -95,6 +101,8 @@ architecture fpu_man_main of fpu_man is
   signal ret_itof : std_logic_vector(31 downto 0);
   signal a_finv : std_logic_vector(31 downto 0);
   signal ret_finv : std_logic_vector(31 downto 0);
+  signal a_fabs : std_logic_vector(31 downto 0);
+  signal ret_fabs : std_logic_vector(31 downto 0);
   signal a_bfeq : std_logic_vector(31 downto 0);
   signal b_bfeq : std_logic_vector(31 downto 0);
   signal ret_bfeq : std_logic;
@@ -139,6 +147,11 @@ begin
     A => a_finv,
     CLK => clk,
     Q => ret_finv
+  );
+  with_fabs : fabs Port map(
+    A => a_fabs,
+    CLK => clk,
+    Q => ret_fabs
   );
   with_bfeq : feq Port map(
     A => a_bfeq,
@@ -206,6 +219,10 @@ begin
       if opc_fpu = "0110000" then
         a_finv <= reg_in_a;
         reg_out <= ret_finv;
+      end if;
+      if opc_fpu = "0111000" then
+        a_fabs <= reg_in_a;
+        reg_out <= ret_fabs;
       end if;
       -- Operation bfeq,bfeqi
       if opc_fpu(6 downto 1) = "100010" then
